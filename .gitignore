@@ -1,0 +1,25 @@
+# Data files (so that they are not in a public repo)
+data/*.xlsx
+data/*.csv
+
+# Old files that don't need to be version controlled
+zzzOld/
+
+# temportary or old files related to the manuscript
+manuscript/.tmp
+manuscript/zzzOld
+manuscript/*~*
+
+# Files in the literature_resources
+literature_resources/*~*
+
+# History files
+.Rhistory
+
+# R data files from past sessions
+.Rdata
+.Rproj.user
+
+# Preview of README.md
+README.html
+
