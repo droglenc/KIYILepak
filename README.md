@@ -5,7 +5,10 @@ This repository contains data files, analysis scripts, and the draft manuscript 
 
 
 # Data files (not in the repo)
-* `data/.xlsx` -- 
+* `data/KIYILepak_2014.xlsx` -- An excel file that contains two worksheets ...
+    * `Ageing` -- Data for individual fish that were sampled for ageing purposes.
+    * `LenFreq` -- Lengths of all captured Kiyi from 1972 to 2014.
+* `data/kiyiLens.csv` -- CSV file that contains lengths from `LenFreq` worksheet of  `data/KIYILepak_2014.xlsx` that have been expanded.  Created in `LFdata_Create.R` and used in `LF_Analysis.R` and `Basic_Summaries.R`.
 
 
 # Scripts
@@ -19,8 +22,8 @@ This repository contains data files, analysis scripts, and the draft manuscript 
     * `pwfGrow: Used in the growth analysis.`
 
 ## Length Frequency Analysis
-* `Create_LFdata.R` -- Process the original length frequency data to produce `pwfLens.csv` which is then loaded in the `Length_Freq.R` script.  This is only run once as running it multiple times seems to run into a memory problem that crashes R/RStudio.
-* `Length_Freq.R` -- Length frequency analysis for last 8 years of data, including showing a break nearly every year at 75-mm and a break that is apparent in only one year near 50 mm.  This makes **Figure 3** in the manuscript (and a supplemental figure of length frequency histograms for 2000-2014).
+* `LF_Create_data.R` -- Process the original length frequency data to produce `kiyiLens.csv` which is then loaded in the `LF_Analysis.R` script.  This is only run once as running it multiple times seems to run into a memory problem that crashes R/RStudio.
+* `LF_Analysis.R` -- Length frequency analysis for last XX years of data.  This makes **Figure XX** in the manuscript.
 
 ## Age, Growth, and Size Analyses
 * `Age_Comparisons.R` -- Precision and bias analysis between readers of scales and otoliths, bias analysis between scales and otoliths.  This makes **Table 1**, **Figure 2**, and the results in the **AGE** section of the manuscript.
