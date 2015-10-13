@@ -18,13 +18,8 @@ This repository contains data files, analysis scripts, and the draft manuscript 
 * `LenFreq.R` -- Process (i.e., expand) the original length frequency data.  Compute length frequency by month to examine in-season growth and for May-Jul samples from 2001-2014.  This makes **Figure XX** in the manuscript.
 
 ## Age, Growth, and Size Analyses
-* `Age_Comparisons.R` -- Precision and bias analysis between readers of scales and otoliths, bias analysis between scales and otoliths.  This makes **Table 1**, **Figure 2**, and the results in the **AGE** section of the manuscript.
-* `Basic_Summaries.R` -- Basic summaries of length, weight, age, and sex variables.  These results are in the **SIZE** section of the manuscript.
-* `Growth.R` -- von Bertalanffy growth analyses.  This makes **Table 2**, **Table 3**, **Table 4**,  **Figure 4**, and the results in the **GROWTH** section of the manuscript.
-* `Weight-Length.R` -- Weight-length relationship analysis including comparing between sexes (F,M,U) and developing an overall W-L relationship.  These results are in the **WEIGHT-LENGTH RELATIONSHIP** section of the manuscript.
-
-## Helper Files
-* `zzzHelpers.R` -- Helper files used in the above scripts.
+* `Age_Comparisons.R` -- 
+* `ALKComparisons` -- Compared age-length keys between sexes within regions and among regions with sexes pooled.  No evidence for any differences in the keys.
 
 
 # Other Files
