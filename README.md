@@ -8,22 +8,14 @@ This repository contains data files, analysis scripts, and the draft manuscript 
 * `data/KIYILepak_2014.xlsx` -- An excel file that contains two worksheets ...
     * `Ageing` -- Data for individual fish that were sampled for ageing purposes.
     * `LenFreq` -- Lengths of all captured Kiyi from 1972 to 2014.
-* `data/kiyiLens.csv` -- CSV file that contains lengths from `LenFreq` worksheet of  `data/KIYILepak_2014.xlsx` that have been expanded.  Created in `LFdata_Create.R` and used in `LF_Analysis.R` and `Basic_Summaries.R`.
 
 
 # Scripts
 ## Initialization
-* `Data_Init.R` -- Initial loading of packages and data, initial preparation of data for other scripts.  This is sourced by all other scripts except `Create_LFdata.R` and creates the following data.frames.
-    * `pwfLens`: Used in the length frequency analysis.
-    * `pwfWL`: Used in the weight-length analysis, length frequency analysis, and sex-ratio analysis.
-    * `pwfAgeS`: Used in the scale age comparisons analysis.
-    * `pwfAgeO`: Used in the otolith age comparisons analysis.
-    * `pwfAgeSO`: Used in the scale-otolith age comparisons analysis.
-    * `pwfGrow: Used in the growth analysis.`
+* `Data_Init.R` -- Initial loading of packages and data, sets up names and colors for the regions, and prepares the `kiyial` data.frame for use in other scripts.  This is sourced by all other scripts except `LenFreq.R`.
 
 ## Length Frequency Analysis
-* `LF_Create_data.R` -- Process the original length frequency data to produce `kiyiLens.csv` which is then loaded in the `LF_Analysis.R` script.  This is only run once as running it multiple times seems to run into a memory problem that crashes R/RStudio.
-* `LF_Analysis.R` -- Length frequency analysis for last XX years of data.  This makes **Figure XX** in the manuscript.
+* `LenFreq.R` -- Process (i.e., expand) the original length frequency data.  Compute length frequency by month to examine in-season growth and for May-Jul samples from 2001-2014.  This makes **Figure XX** in the manuscript.
 
 ## Age, Growth, and Size Analyses
 * `Age_Comparisons.R` -- Precision and bias analysis between readers of scales and otoliths, bias analysis between scales and otoliths.  This makes **Table 1**, **Figure 2**, and the results in the **AGE** section of the manuscript.
