@@ -16,7 +16,6 @@ library(readxl)    # reading data
 library(FSA)       # mapvalues, filterD
 library(magrittr)  # for %<>%
 library(dplyr)     # manipulating data
-library(NCStats)
 
 
 ##############################################################
