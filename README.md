@@ -18,9 +18,9 @@ This repository contains data files, analysis scripts, and the draft manuscript 
 * `LenFreq.R` -- Process (i.e., expand) the original length frequency data.  Compute length frequency by month to examine in-season growth and for May-Jul samples from 2001-2014.  This makes **Figure XX** in the manuscript.
 
 ## Age, Growth, and Size Analyses
-* `Age_Comparisons.R` -- 
-* `ALKComparisons` -- Compared age-length keys between sexes within regions and among regions with sexes pooled.  No evidence for any differences in the keys.
-
+* `AgeComparisons.R` -- Compares (bias and precision) scale to otolith ages and otolith ages between readers.  This makes **Figure XX** in the manuscript
+* `ALKComparisons.R` -- Compares age-length keys between sexes within regions and among regions with sexes pooled.  No evidence for any differences in the keys.
+* `AgeAnalysis.R` -- makes and applies an age-length key (with consensus otolith ages) and then summarizes the age frequency.
 
 # Other Files
 * `KIYILepak.Rproj` -- RStudio project file.
