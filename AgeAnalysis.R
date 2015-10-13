@@ -34,7 +34,7 @@ round(alk,3)
 
 ## Apply ALK to all unaged fish
 # Isolate unaged fish
-kiyial.unaged <- tmp %>% filterD(is.na(otoAge))
+kiyial.unaged <- tmp %>% filterD(is.na(otoAge)) %>% as.data.frame()
 all(is.na(kiyial.unaged$otoAge))  # confirm TRUE
 # Apply the ALK
 kiyial.unaged.mod <- alkIndivAge(alk,otoAge~tl,data=kiyial.unaged)
