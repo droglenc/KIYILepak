@@ -1,5 +1,7 @@
 ##############################################################
 ##                                                          ##
+## COMPARISONS OF AGE-LENGTH KEYS                           ##
+##                                                          ##
 ## 1. Prepare data for comparisons                          ##
 ## 2. ALK comparisons by sex within regions                 ##
 ## 3. ALK comparisons by regions (sexes pooled)             ##
@@ -13,7 +15,7 @@
 # Get raw data and load packages
 source("DataInit.R")
 # Temporarily remove juvenile fish
-tmp <- filterD(kiyial,sex!="juvenile")
+tmp <- filterD(kiyiAge,sex!="juvenile")
 
 # Examine age frequency by region
 xtabs(~otoAge+region,data=tmp)
