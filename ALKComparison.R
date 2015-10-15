@@ -14,9 +14,11 @@
 ##############################################################
 # Get raw data and load packages
 source("DataInit.R")
-# Temporarily remove juvenile fish
+# Remove juvenile fish (same as removing all fish <140 mm)
 tmp <- filterD(kiyiAge,sex!="juvenile")
 
+# Examine age frequency by region
+xtabs(~otoAge,data=tmp)
 # Examine age frequency by region
 xtabs(~otoAge+region,data=tmp)
 # Examine number by region
@@ -84,16 +86,16 @@ mod4 <- multinom(otoAge~lcat10*region,data=tmp,maxit=500)
 tmpReg <- anova(mod3,mod4)
 
 # Visualize by region --- Not very useful
-(tmpW <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="West")))
-tmpE <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="East"))
-tmpN <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="North"))
-tmpS <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="South"))
-tmpI <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="Isle"))
-alkPlot(tmpW,type="bubble",col=rgb(1,0,0,1/3),xlim=c(140,240),ylim=c(4,12))
-alkPlot(tmpE,type="bubble",col=rgb(0,0,1,1/3),add=TRUE)
-alkPlot(tmpN,type="bubble",col=rgb(0,1,0,1/3),add=TRUE)
-alkPlot(tmpS,type="bubble",col=rgb(1,0,1,1/3),add=TRUE)
-alkPlot(tmpI,type="bubble",col=rgb(1,1,0,1/3),add=TRUE)
+(tmpWdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="West")))
+tmpEdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="East"))
+tmpNdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="North"))
+tmpSdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="South"))
+tmpIdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="Isle"))
+alkPlot(tmpWdf,type="bubble",col=rgb(1,0,0,1/3),xlim=c(140,240),ylim=c(4,12))
+alkPlot(tmpEdf,type="bubble",col=rgb(0,0,1,1/3),add=TRUE)
+alkPlot(tmpNdf,type="bubble",col=rgb(0,1,0,1/3),add=TRUE)
+alkPlot(tmpSdf,type="bubble",col=rgb(1,0,1,1/3),add=TRUE)
+alkPlot(tmpIdf,type="bubble",col=rgb(1,1,0,1/3),add=TRUE)
 
 
 ##############################################################

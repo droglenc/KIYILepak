@@ -19,17 +19,16 @@ set.seed(34783478)
 ##############################################################
 ## 1. Load data
 ##############################################################
+rm(list=ls()); cat("\014")
+source("DataInit.R")
 # Get raw age data and restrict to fish >=140 mm (for sample
 # size considerations)
-source("DataInit.R")
-tmp <- filter(kiyiAge,tl>=140)
-# Get raw LF data, reduce to May-July 2014, remove some vars,
-# also restrict to fish >- 140 mm, and add an otoAge variable
-# to record the new ages
-kiyiLF14 <- kiyiLF %>%
-  filterD(Use==1,year==2014,mon %in% c("May","Jun","Jul"),
-          tl>=140) %>%
-  select(-c(OP_ID,YEAR,SERIAL,CRUISE,op_date,Use,UseNotes,year)) %>%
+kiyiAge <- filter(kiyiAge,tl>=140)
+# Get raw LF 2014 data, restrict to fish >= 140 mm, and add an
+# otoAge variable to record the new ages
+kiyiLF14 <- kiyiLF14 %>%
+  filterD(tl>=140) %>%
+  select(-c(OP_ID,YEAR,SERIAL,CRUISE,op_date,year)) %>%
   mutate(otoAge=as.numeric(NA)) %>%
   as.data.frame()
 
@@ -38,28 +37,28 @@ kiyiLF14 <- kiyiLF %>%
 ##############################################################
 ## Prepare data
 # Separate data.frames for each region
-west  <- filterD(tmp,region=="West")
-east  <- filterD(tmp,region=="East")
-north <- filterD(tmp,region=="North")
-south <- filterD(tmp,region=="South")
-isle  <- filterD(tmp,region=="Isle")
+west  <- filterD(kiyiAge,region=="West")
+isle  <- filterD(kiyiAge,region=="Isle")
+north <- filterD(kiyiAge,region=="North")
+south <- filterD(kiyiAge,region=="South")
+east  <- filterD(kiyiAge,region=="East")
 
 ## Construct separate ALKs
 west.aged  <- west  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
-east.aged  <- east  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
+isle.aged  <- isle  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
 north.aged <- north %>% filterD(!is.na(otoAge)) %>% as.data.frame()
 south.aged <- south %>% filterD(!is.na(otoAge)) %>% as.data.frame()
-isle.aged  <- isle  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
+east.aged  <- east  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
 
 west.alk  <- prop.table(xtabs(~lcat10+otoAge,data=west.aged),margin=1)
-east.alk  <- prop.table(xtabs(~lcat10+otoAge,data=east.aged),margin=1)
+isle.alk  <- prop.table(xtabs(~lcat10+otoAge,data=isle.aged),margin=1)
 north.alk <- prop.table(xtabs(~lcat10+otoAge,data=north.aged),margin=1)
 south.alk <- prop.table(xtabs(~lcat10+otoAge,data=south.aged),margin=1)
 # assumed that 140 and 150 bins were the same as 160 bin for
 # applying the ALK below
 south.alk <- rbind(south.alk[c(1,1),],south.alk)
 rownames(south.alk)[1:2] <- c(140,150)
-isle.alk  <- prop.table(xtabs(~lcat10+otoAge,data=isle.aged),margin=1)
+east.alk  <- prop.table(xtabs(~lcat10+otoAge,data=east.aged),margin=1)
 
 
 ##############################################################
@@ -102,33 +101,25 @@ alkPlot(east.alks)
 ##############################################################
 ## 6. Apply the age-length keys                             ##
 ##############################################################
+# sample size that ALK was applied to
+nrow(kiyiLF14)
 # get the unaged fish from the length frequency data.frame
 west.unaged   <- filterD(kiyiLF14,region=="West")
-east.unaged   <- filterD(kiyiLF14,region=="East")
+isle.unaged   <- filterD(kiyiLF14,region=="Isle")
 north.unaged  <- filterD(kiyiLF14,region=="North")
 south.unaged  <- filterD(kiyiLF14,region=="South")
-isle.unaged   <- filterD(kiyiLF14,region=="Isle")
+east.unaged   <- filterD(kiyiLF14,region=="East")
 # apply the ALKS
 west.unaged.mod  <- alkIndivAge(west.alk,otoAge~tl,data=west.unaged)
-east.unaged.mod  <- alkIndivAge(east.alk,otoAge~tl,data=east.unaged)
+isle.unaged.mod  <- alkIndivAge(isle.alk,otoAge~tl,data=isle.unaged)
 north.unaged.mod <- alkIndivAge(north.alk,otoAge~tl,data=north.unaged)
 south.unaged.mod <- alkIndivAge(south.alk,otoAge~tl,data=south.unaged)
-isle.unaged.mod  <- alkIndivAge(isle.alk,otoAge~tl,data=isle.unaged)
+east.unaged.mod  <- alkIndivAge(east.alk,otoAge~tl,data=east.unaged)
 
 ## Put all of the data.frames together to make one with all aged fish
-kiyiAge.fnl <- rbind(west.unaged.mod,east.unaged.mod,north.unaged.mod,
-                     south.unaged.mod,isle.unaged.mod)
+kiyiAge.fnl <- rbind(west.unaged.mod,isle.unaged.mod,north.unaged.mod,
+                     south.unaged.mod,east.unaged.mod)
 any(is.na(kiyiAge.fnl$otoAge))     # confirm FALSE
-
-
-
-##############################################################
-## 3. Summarize assigned ages                               ##
-##############################################################
-# Consensus ages histogram
-hist(~otoAge,data=kiyiAge.fnl,breaks=2:20,xlab="Age",col="gray50")
-# Summary of Consensus Ages
-#(fnl.summary <- xtabs(~lcat10+otoAge,data=kiyiAge.fnl))
 
 
 
@@ -148,10 +139,10 @@ round(prop.table(kiyi.age2,margin=1)*100,0)
 
 # PRESENTATION-QUALITY GRAPHICS
 
-png("manuscript/Figs/FigureX_AgeFreq.PNG",width=6.5,height=6.5,units="in",pointsize=24,family="sans",res=600)
+png("manuscript/Figs/FigureX_AgeFreq2.PNG",width=6.5,height=6.5,units="in",pointsize=24,family="sans",res=600)
 ggplot(data=kiyiAge.fnl,aes(x=otoAge)) +
-  theme_bw() + theme_hist +
-  scale_x_continuous(expand=c(0.02,0),limits=c(4,14),breaks=4:20) +
+  theme_kiyi() +
+  scale_x_continuous(expand=c(0.02,0),limits=c(3.5,14.5),breaks=4:20) +
   scale_y_continuous(expand=c(0.05,0)) +
   geom_bar(color="black",fill="gray50") +
   facet_wrap(~region,ncol=1,scales="free_y") +
