@@ -41,10 +41,12 @@ names(clrs) <- regS
 # add log10 of weight and length
 # make Reg factor variable
 # make a Sex factor variable (after mappling to words)
+# make a long region variable
 kiyiAge <- read_excel("data/KIYILepak_2014.xlsx",sheet="Ageing") %>%
   mutate(lcat10=lencat(tl,w=10),
          logW=log10(wt),logL=log10(tl),
          region=factor(region,levels=regS),
+         regionL=factor(mapvalues(region,regS,regL),levels=regL),
          sex=factor(mapvalues(sex,from=c(0,1,2),to=c("juvenile","male","female"))))
 headtail(kiyiAge)
 
@@ -68,6 +70,7 @@ kiyiLF <- read_excel("data/KIYILepak_2014.xlsx",sheet="LenFreq") %>%
          mon=month(op_date,label=TRUE),
          tl=LENGTH,
          region=factor(region,levels=regS),
+         regionL=factor(mapvalues(region,regS,regL),levels=regL),
          beg_depth=BEG_DEPTH,
          end_depth=END_DEPTH,
          avg_depth=(beg_depth+end_depth)/2) %>%

@@ -38,11 +38,10 @@ summary(ap.B,what="precision")
 # Publication quality graphic
 png("manuscript/Figs/FigureX_OtoOtoComp.PNG",width=4.5,height=4.5,units="in",pointsize=14,family="sans",res=600)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.7,0.5,0),tcl=-0.2,las=1)
-plot(ab.tA2,show.n=FALSE,lwd.CI=2,col.CIsig="gray",
-     lwd.agree=1,xlim=c(3,20),difference=TRUE,
+plot(ab.tA2,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="gray",yaxt="n",
+     lwd.agree=1,xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
      show.pts=TRUE,transparency=1/15,ylab="Second Reader",xlab="First Reader")
-axis(2,3:20,NA)
-axis(2,seq(3,19,2))
+axis(2,seq(-3,2,1))
 dev.off()
 
 
@@ -60,10 +59,10 @@ summary(ab.tA1,what="symmetry")
 # Publication quality graphic
 png("manuscript/Figs/FigureX_ScaleOtoComp.PNG",width=4.5,height=4.5,units="in",pointsize=14,family="sans",res=600)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.7,0.5,0),tcl=-0.2,las=1)
-plot(ab.tA1,show.n=FALSE,lwd.CI=2,col.CIsig="gray",
-     lwd.agree=1,xlim=c(3,16),difference=TRUE,
+plot(ab.tA1,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="gray",
+     lwd.agree=1,xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
      show.pts=TRUE,transparency=1/5)
-axis(2,seq(4,16,2))
+axis(2,seq(-10,0,1))
 axis(1,seq(4,16,2))
 dev.off()
 

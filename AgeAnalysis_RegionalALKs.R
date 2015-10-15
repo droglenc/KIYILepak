@@ -138,13 +138,12 @@ round(prop.table(kiyi.age2,margin=1)*100,0)
 
 
 # PRESENTATION-QUALITY GRAPHICS
-
 png("manuscript/Figs/FigureX_AgeFreq2.PNG",width=6.5,height=6.5,units="in",pointsize=24,family="sans",res=600)
 ggplot(data=kiyiAge.fnl,aes(x=otoAge)) +
   theme_kiyi() +
   scale_x_continuous(expand=c(0.02,0),limits=c(3.5,14.5),breaks=4:20) +
   scale_y_continuous(expand=c(0.05,0)) +
   geom_bar(color="black",fill="gray50") +
-  facet_wrap(~region,ncol=1,scales="free_y") +
+  facet_wrap(~regionL,ncol=1,scales="free_y") +
   labs(x="Consensus Otolith Age",y="Frequency")
 dev.off()
