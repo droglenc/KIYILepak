@@ -2,21 +2,27 @@
 ##                                                          ##
 ## 1. Prepare data for comparisons                          ##
 ## 2. Between-reader otolith comparisons (TAL v. DHO ages)  ##
-## 3. Otolith-scales comparisons (only TAL ages)            ##
+## 3. Otolith argin descriptions by each reader             ##
+## 4. Otolith-scales comparisons (only TAL ages)            ##
 ##                                                          ##
 ##############################################################
+
+# clear workspace and console
+rm(list=ls()); cat("\014")
 
 ##############################################################
 ## 1. Prepare data for comparisons                          ##
 ##############################################################
 # Get raw data and load packages
-rm(list=ls()); cat("\014")
 source("DataInit.R")
 # Reduce data for otolith-otolith comparisons
-kiyiOO <- kiyiAge[complete.cases(kiyiAge[,c("otoAge_TAL","otoAge_DHO")]),]
+kiyiOO <- filterD(kiyiAge,otoChar=="USEABLE")
+# get sample size
+nrow(kiyiOO)
 # Reduce data for otolith-scale comparisons
 kiyiOS <- kiyiAge[complete.cases(kiyiAge[,c("scaleAge","otoAge_TAL")]),]
-
+# get sample size
+nrow(kiyiOS)
 
 
 ##############################################################
@@ -47,7 +53,15 @@ dev.off()
 
 
 ##############################################################
-## 3. Otolith-scales comparisons (only TAL ages)            ##
+## 3. Otolith argin descriptions by each reader             ##
+##############################################################
+omarg <- round(prop.table(xtabs(~otoEdge_TAL+otoEdge_DHO,data=kiyiOO))*100,1)
+addmargins(omarg)
+
+
+
+##############################################################
+## 4. Otolith-scales comparisons (only TAL ages)            ##
 ##############################################################
 ab.tA1 <- ageBias(scaleAge~otoAge_TAL,data=kiyiOS,
                   ref.lab="Otolith Age",nref.lab="Scale Age")

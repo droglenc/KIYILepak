@@ -13,13 +13,14 @@
 ##                                                          ##
 ##############################################################
 
+# clear workspace and console
+rm(list=ls()); cat("\014")
 # Set random seed ... all randomization same on each run
 set.seed(34783478)
 
 ##############################################################
 ## 1. Load data
 ##############################################################
-rm(list=ls()); cat("\014")
 source("DataInit.R")
 # Get raw age data and restrict to fish >=140 mm (for sample
 # size considerations)
@@ -28,7 +29,6 @@ kiyiAge <- filter(kiyiAge,tl>=140)
 # otoAge variable to record the new ages
 kiyiLF14 <- kiyiLF14 %>%
   filterD(tl>=140) %>%
-  select(-c(OP_ID,YEAR,SERIAL,CRUISE,op_date,year)) %>%
   mutate(otoAge=as.numeric(NA)) %>%
   as.data.frame()
 

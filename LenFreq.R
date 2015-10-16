@@ -9,13 +9,18 @@
 ##                                                          ##
 ##############################################################
 
+# clear workspace and console
+rm(list=ls()); cat("\014")
+# Set random seed ... bootstraps will be the same each time
+set.seed(34783478)
+
 ##############################################################
 ##  1. Preliminaries                                        ##
 ##############################################################
 # Get the main LF data.frame ... in kiyiLF
 rm(list=ls()); cat("\014")
 source("DataInit.R")
-# Restrict to fish >-140 mm in Jun-Jul of 2014
+# Restrict to fish >=140 mm in Jun-Jul of 2014
 kiyiLF14 <- kiyiLF %>%
   filterD(year==2014,mon %in% c("Jun","Jul"),tl>=140)
 # Split by region for comparisons below
@@ -58,7 +63,7 @@ ggplot(tmp,aes(x=tl)) +
 ##                                                          ##
 ##############################################################
 # pairwise bootstrapped Kolmogorov-Smirnov tests
-nboots <- 1000
+nboots <- 2500
 ks.pvals <- c(ks.boot(westLF$tl,isleLF$tl,nboots=nboots)$ks.boot.pvalue,
               ks.boot(westLF$tl,northLF$tl,nboots=nboots)$ks.boot.pvalue,
               ks.boot(westLF$tl,southLF$tl,nboots=nboots)$ks.boot.pvalue,

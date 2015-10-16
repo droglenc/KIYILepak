@@ -7,10 +7,14 @@
 ##  2. Set up colors and names for the regions              ##
 ##  3. Read and manipulate ageing data.frame                ##
 ##  4. Read and manipulate length frequency data.frame      ##
-##  5. Basic summaries                                      ##
-##  6. Make a histogram ggplot2 theme                       ##
+##  5. Read and manipulate station information data.frame   ##
+##  6. Basic summaries                                      ##
+##  7. Make a histogram ggplot2 theme                       ##
 ##                                                          ##
 ##############################################################
+
+# clear workspace and console
+rm(list=ls()); cat("\014")
 
 ##############################################################
 ##  1. Load packages needed here and in other scripts       ##
@@ -29,7 +33,8 @@ library(dplyr)     # manipulating data
 ##  2. Set up colors and names for the regions              ##
 ##############################################################
 regS <- c("West","Isle","North","South","East")
-regL <- c("Western Arm","Isle Royale","Northern Ontario","Southern Ontario","Eastern Michigan")
+regL <- c("Western Arm","Isle Royale","Northern Ontario",
+          "Southern Ontario","Eastern Michigan")
 clrs <- c("black","blue","green","orange","red")
 names(clrs) <- regS
 
@@ -48,7 +53,7 @@ kiyiAge <- read_excel("data/KIYILepak_2014.xlsx",sheet="Ageing") %>%
          region=factor(region,levels=regS),
          regionL=factor(mapvalues(region,regS,regL),levels=regL),
          sex=factor(mapvalues(sex,from=c(0,1,2),to=c("juvenile","male","female"))))
-headtail(kiyiAge)
+
 
 
 ##############################################################
@@ -63,18 +68,17 @@ headtail(kiyiAge)
 #   Remove unused variables
 kiyiLF <- read_excel("data/KIYILepak_2014.xlsx",sheet="LenFreq") %>%
   filterD(Use==1) %>%
-  mutate(op_date=ymd(OP_DATE),
+  setNames(tolower(names(.))) %>%
+  mutate(op_date=ymd(op_date),
          year=year(op_date),
          year=ifelse(year>2020,year-100,year),
          fyear=factor(year),
          mon=month(op_date,label=TRUE),
-         tl=LENGTH,
+         tl=length,
          region=factor(region,levels=regS),
-         regionL=factor(mapvalues(region,regS,regL),levels=regL),
-         beg_depth=BEG_DEPTH,
-         end_depth=END_DEPTH,
-         avg_depth=(beg_depth+end_depth)/2) %>%
-  select(-c(OP_DATE,BEG_DEPTH,END_DEPTH,LENGTH,TARGET,TR_DESIGN,Use,UseNotes))
+         regionL=factor(mapvalues(region,regS,regL),levels=regL)) %>%
+  select(-c(op_id,op_date,serial,cruise,target,tr_design,
+            beg_depth,end_depth,use,usenotes))
 
 # Expend the raw LF data ... the raw LF data are recorded as the
 #   frequency of fish for each length by year.  These data
@@ -84,11 +88,12 @@ kiyiLF <- read_excel("data/KIYILepak_2014.xlsx",sheet="LenFreq") %>%
 #     Drop the "ActualCount" and "TotalCount" columns
 # Removed fish captured prior to 1992 because small sample sizes.
 # Added a 5-mm length category variale
-reprows <- rep(1:nrow(kiyiLF),kiyiLF$TotalCount)
+reprows <- rep(1:nrow(kiyiLF),kiyiLF$totalcount)
 kiyiLF <- kiyiLF[reprows,] %>%
-  select(-c(ActualCount,TotalCount)) %>%
+  select(-c(actualcount,totalcount)) %>%
   filterD(year>=1992) %>%
-  mutate(lcat5=lencat(tl,w=5))
+  mutate(lcat5=lencat(tl,w=5)) %>%
+  as.data.frame()
 
 # Get the LF data for only 2014 ... Restrict to Jun-Jul
 kiyiLF14 <- kiyiLF %>%
@@ -98,27 +103,41 @@ kiyiLF14 <- kiyiLF %>%
 
 
 ##############################################################
-##  5. Basic Summaries                                      ##
+##  5. Read stations information data.frame                 ##
 ##############################################################
-# Summarize somethings by location
-gear <- kiyiLF14 %>%
-  group_by(LOCATION) %>%
-  summarize(catch=n(),
-            mnadep=mean(avg_depth),
-            mnbdep=mean(beg_depth),
-            mnedep=mean(end_depth)) %>%
+# renamed to lower_case
+# handled dates and regions
+# removed several variables that were no longer needed
+# removed location==2 (May and different region than others)
+kiyiStations <- read_excel("data/KIYILepak_2014.xlsx",sheet="Stations") %>%
+  setNames(tolower(names(.))) %>%
+  mutate(op_date=ymd(op_date),
+         year=year(op_date),
+         year=ifelse(year>2020,year-100,year),
+         mon=month(op_date,label=TRUE),
+         region=factor(region,levels=regS),
+         regionL=factor(mapvalues(region,regS,regL),levels=regL),
+         type=factor(type)) %>%
+  select(-op_date) %>%
+  filterD(location!=2) %>%
   as.data.frame()
+
+
+
+##############################################################
+##  6. Basic Summaries                                      ##
+##############################################################
 # Number of locations where Kiyi were captured
-nrow(gear)
-# Number of Kiyi sampled (should be 983)
-sum(gear$catch)
-# Summarize depths for cross-contour tows (82 & 84)
-tmp <- filterD(gear,LOCATION %in% c(82,84))
-Summarize(~mnbdep,data=tmp,digits=1)
-Summarize(~mnedep,data=tmp,digits=1)
-# Summarize depths for along-contour tows (not 82 & 84)
-tmp <- filterD(gear,!(LOCATION %in% c(82,84)))
-Summarize(~mnadep,data=tmp,digits=1)
+nrow(kiyiStations)
+# Summarize depths & distances for nearshore cross-contour tows (82 & 84)
+tmp <- filterD(kiyiStations,type=="nearshore")
+Summarize(~beg_depth,data=tmp,digits=0)
+Summarize(~end_depth,data=tmp,digits=0)
+Summarize(~distance,data=tmp,digits=2)
+# Summarize depths for offshore along-contour tows (not 82 & 84)
+tmp <- filterD(kiyiStations,type=="offshore")
+Summarize(~avg_depth,data=tmp,digits=0)
+Summarize(~distance,data=tmp,digits=2)
 
 # basic length summary of the entire sample (for the manuscript)
 Summarize(~tl,data=kiyiLF14,digits=2)
@@ -141,7 +160,7 @@ xtabs(~lcat10+sex+region,data=kiyiAge)
 xtabs(~lcat10+sex+region,data=filterD(kiyiAge,!is.na(otoAge)))
 
 # summary of the otolith characteristics
-octbl <- xtabs(~otoChar,data=kiyiAge)
+( octbl <- xtabs(~otoChar,data=kiyiAge) )
 # find proportion unuseable
 prop.table(octbl)*100
 # find proportion of useable that were unreadable
@@ -149,7 +168,7 @@ prop.table(octbl[-2])*100
 
 
 ##############################################################
-##  6. Make some ggplot2 themes                             ##
+##  7. Make some ggplot2 themes                             ##
 ##############################################################
 theme_kiyi <- function (base_size = 12, base_family = "") {
   theme_bw(base_size=base_size,base_family=base_family) +
