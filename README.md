@@ -23,6 +23,7 @@ This repository contains data files, analysis scripts, and the draft manuscript 
 * `AgeAnalysis.R` -- makes and applies an age-length key (with consensus otolith ages) and then summarizes the age frequency.
 
 # Other Files
+* `manuscript/map/` -- script and shape files to produce the map of Lake Superior with sampling locations.
 * `KIYILepak.Rproj` -- RStudio project file.
 * `.gitignore` -- things to ignore when committing or pushing to GitHub.
 * `README.md` -- This readme file.
