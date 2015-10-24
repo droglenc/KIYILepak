@@ -35,10 +35,10 @@ xlm <- -c(92.2,84.35); ylm <- c(46.1,49.5)
 xd <- diff(xlm); yd <- diff(ylm)
 ydc <- yd * 1/cos((mean(ylm) * pi)/180)
 x_y <- xd/ydc
-wid <- 4.5; ( hig <- wid/x_y )
+wid <- 6; ( hig <- wid/x_y )
 
 ## Make the map
-png("../Figs/Figure1_SamplesMap.png",width=wid,height=hig,units="in",pointsize=12,family="sans",res=600)
+png("../Figs/Figure1_SamplesMap.png",width=wid,height=hig,units="in",pointsize=14,family="sans",res=600)
 par(xaxs="i", yaxs="i", mar=c(2,3,0.5,0.5),mgp=c(2,0.05,0),las=1,tcl=-0.2)
 # Lake Superior
 plot(gl,xlim=xlm,ylim=ylm,axes=TRUE,lwd=0.6,las=1,yaxt="n",xaxt="n")
