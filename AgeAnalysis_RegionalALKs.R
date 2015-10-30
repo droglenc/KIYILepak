@@ -1,6 +1,6 @@
 ##############################################################
 ##                                                          ##
-## AGE ANALYSIS USEING REGIONAL AGE-LENGTH KEYS             ##
+## AGE ANALYSIS USING REGIONAL AGE-LENGTH KEYS              ##
 ##                                                          ##
 ## 1. Load data                                             ##
 ## 2. Construct observed age-length keys                    ##
@@ -13,10 +13,13 @@
 ##                                                          ##
 ##############################################################
 
+
 # clear workspace and console
 rm(list=ls()); cat("\014")
 # Set random seed ... all randomization same on each run
 set.seed(34783478)
+
+
 
 ##############################################################
 ## 1. Load data
@@ -27,9 +30,8 @@ source("DataInit.R")
 kiyiAge <- filter(kiyiAge,tl>=140)
 # Get raw LF 2014 data, restrict to fish >= 140 mm, and add an
 # otoAge variable to record the new ages
-kiyiLF14 <- kiyiLF14 %>%
-  filterD(tl>=140) %>%
-  mutate(otoAge=as.numeric(NA)) %>%
+kiyiLF14 %<>% mutate(otoAge=as.numeric(NA)) %>%
+  filter(tl>=140) %>%
   as.data.frame()
 
 ##############################################################
@@ -38,37 +40,40 @@ kiyiLF14 <- kiyiLF14 %>%
 ## Prepare data
 # Separate data.frames for each region
 west  <- filterD(kiyiAge,region=="West")
-isle  <- filterD(kiyiAge,region=="Isle")
-north <- filterD(kiyiAge,region=="North")
-south <- filterD(kiyiAge,region=="South")
-east  <- filterD(kiyiAge,region=="East")
+NoMich  <- filterD(kiyiAge,region=="NoMich")
+NoOnt <- filterD(kiyiAge,region=="NoOnt")
+SoOnt <- filterD(kiyiAge,region=="SoOnt")
+EastMich  <- filterD(kiyiAge,region=="EastMich")
 
 ## Construct separate ALKs
 west.aged  <- west  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
-isle.aged  <- isle  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
-north.aged <- north %>% filterD(!is.na(otoAge)) %>% as.data.frame()
-south.aged <- south %>% filterD(!is.na(otoAge)) %>% as.data.frame()
-east.aged  <- east  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
+NoMich.aged  <- NoMich  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
+NoOnt.aged <- NoOnt %>% filterD(!is.na(otoAge)) %>% as.data.frame()
+SoOnt.aged <- SoOnt %>% filterD(!is.na(otoAge)) %>% as.data.frame()
+EastMich.aged  <- EastMich  %>% filterD(!is.na(otoAge)) %>% as.data.frame()
 
 west.alk  <- prop.table(xtabs(~lcat10+otoAge,data=west.aged),margin=1)
-isle.alk  <- prop.table(xtabs(~lcat10+otoAge,data=isle.aged),margin=1)
-north.alk <- prop.table(xtabs(~lcat10+otoAge,data=north.aged),margin=1)
-south.alk <- prop.table(xtabs(~lcat10+otoAge,data=south.aged),margin=1)
+NoMich.alk  <- prop.table(xtabs(~lcat10+otoAge,data=NoMich.aged),margin=1)
+NoOnt.alk <- prop.table(xtabs(~lcat10+otoAge,data=NoOnt.aged),margin=1)
+SoOnt.alk <- prop.table(xtabs(~lcat10+otoAge,data=SoOnt.aged),margin=1)
 # assumed that 140 and 150 bins were the same as 160 bin for
 # applying the ALK below
-south.alk <- rbind(south.alk[c(1,1),],south.alk)
-rownames(south.alk)[1:2] <- c(140,150)
-east.alk  <- prop.table(xtabs(~lcat10+otoAge,data=east.aged),margin=1)
+SoOnt.alk <- rbind(SoOnt.alk[c(1,1),],SoOnt.alk)
+rownames(SoOnt.alk)[1:2] <- c(140,150)
+EastMich.alk  <- prop.table(xtabs(~lcat10+otoAge,data=EastMich.aged),margin=1)
+
 
 
 ##############################################################
 ## 3. Visualize observed age-length keys                    ##
 ##############################################################
 alkPlot(west.alk)
-alkPlot(isle.alk)
-alkPlot(north.alk)
-alkPlot(south.alk)
-alkPlot(east.alk)
+alkPlot(NoMich.alk)
+alkPlot(NoOnt.alk)
+alkPlot(SoOnt.alk)
+alkPlot(EastMich.alk)
+
+
 
 ##############################################################
 ## 4. Construct smoothed age-length keys                    ##
@@ -79,24 +84,28 @@ alkPlot(east.alk)
 lens <- seq(140,290,10)
 west.alks  <- predict(multinom(otoAge~lcat10,data=west.aged,maxit=500),
                       data.frame(lcat10=lens),type="probs")
-isle.alks  <- predict(multinom(otoAge~lcat10,data=isle.aged,maxit=500),
+NoMich.alks  <- predict(multinom(otoAge~lcat10,data=NoMich.aged,maxit=500),
                       data.frame(lcat10=lens),type="probs")
-north.alks  <- predict(multinom(otoAge~lcat10,data=north.aged,maxit=500),
+NoOnt.alks  <- predict(multinom(otoAge~lcat10,data=NoOnt.aged,maxit=500),
                       data.frame(lcat10=lens),type="probs")
-south.alks  <- predict(multinom(otoAge~lcat10,data=south.aged,maxit=500),
+SoOnt.alks  <- predict(multinom(otoAge~lcat10,data=SoOnt.aged,maxit=500),
                       data.frame(lcat10=lens),type="probs")
-east.alks  <- predict(multinom(otoAge~lcat10,data=east.aged,maxit=500),
+EastMich.alks  <- predict(multinom(otoAge~lcat10,data=EastMich.aged,maxit=500),
                       data.frame(lcat10=lens),type="probs")
-rownames(west.alks) <- rownames(isle.alks) <- rownames(north.alks) <- rownames(south.alks) <- rownames(east.alks) <- lens
+rownames(west.alks) <- rownames(NoMich.alks) <- rownames(NoOnt.alks) <- rownames(SoOnt.alks) <- rownames(EastMich.alks) <- lens
+
+
 
 ##############################################################
 ## 5. Visualize smoothed age-length keys                    ##
 ##############################################################
 alkPlot(west.alks)
-alkPlot(isle.alks)
-alkPlot(north.alks)
-alkPlot(south.alks)
-alkPlot(east.alks)
+alkPlot(NoMich.alks)
+alkPlot(NoOnt.alks)
+alkPlot(SoOnt.alks)
+alkPlot(EastMich.alks)
+
+
 
 ##############################################################
 ## 6. Apply the age-length keys                             ##
@@ -105,20 +114,20 @@ alkPlot(east.alks)
 nrow(kiyiLF14)
 # get the unaged fish from the length frequency data.frame
 west.unaged   <- filterD(kiyiLF14,region=="West")
-isle.unaged   <- filterD(kiyiLF14,region=="Isle")
-north.unaged  <- filterD(kiyiLF14,region=="North")
-south.unaged  <- filterD(kiyiLF14,region=="South")
-east.unaged   <- filterD(kiyiLF14,region=="East")
+NoMich.unaged   <- filterD(kiyiLF14,region=="NoMich")
+NoOnt.unaged  <- filterD(kiyiLF14,region=="NoOnt")
+SoOnt.unaged  <- filterD(kiyiLF14,region=="SoOnt")
+EastMich.unaged   <- filterD(kiyiLF14,region=="EastMich")
 # apply the ALKS
 west.unaged.mod  <- alkIndivAge(west.alk,otoAge~tl,data=west.unaged)
-isle.unaged.mod  <- alkIndivAge(isle.alk,otoAge~tl,data=isle.unaged)
-north.unaged.mod <- alkIndivAge(north.alk,otoAge~tl,data=north.unaged)
-south.unaged.mod <- alkIndivAge(south.alk,otoAge~tl,data=south.unaged)
-east.unaged.mod  <- alkIndivAge(east.alk,otoAge~tl,data=east.unaged)
+NoMich.unaged.mod  <- alkIndivAge(NoMich.alk,otoAge~tl,data=NoMich.unaged)
+NoOnt.unaged.mod <- alkIndivAge(NoOnt.alk,otoAge~tl,data=NoOnt.unaged)
+SoOnt.unaged.mod <- alkIndivAge(SoOnt.alk,otoAge~tl,data=SoOnt.unaged)
+EastMich.unaged.mod  <- alkIndivAge(EastMich.alk,otoAge~tl,data=EastMich.unaged)
 
 ## Put all of the data.frames together to make one with all aged fish
-kiyiAge.fnl <- rbind(west.unaged.mod,isle.unaged.mod,north.unaged.mod,
-                     south.unaged.mod,east.unaged.mod)
+kiyiAge.fnl <- rbind(west.unaged.mod,NoMich.unaged.mod,NoOnt.unaged.mod,
+                     SoOnt.unaged.mod,EastMich.unaged.mod)
 any(is.na(kiyiAge.fnl$otoAge))     # confirm FALSE
 
 
@@ -138,12 +147,22 @@ round(prop.table(kiyi.age2,margin=1)*100,0)
 
 
 # PRESENTATION-QUALITY GRAPHICS
-png("manuscript/Figs/FigureX_AgeFreq2.PNG",width=6.5,height=6.5,units="in",pointsize=24,family="sans",res=600)
-ggplot(data=kiyiAge.fnl,aes(x=otoAge)) +
+tmp <- kiyiAge.fnl %>%
+  group_by(regL) %>%
+  summarize(n=n())
+
+tmpAge <- kiyiAge.fnl %>%
+  mutate(regL2=factor(mapvalues(regL,levels(regL),
+                                paste0(tmp$regL," (n=",tmp$n,")"))))
+
+
+png("manuscript/Figs/FigureX_AgeFreq2.PNG",width=6.5,height=6.5,
+    units="in",pointsize=24,family="sans",res=600)
+ggplot(data=tmpAge,aes(x=otoAge)) +
   theme_kiyi() +
   scale_x_continuous(expand=c(0.02,0),limits=c(3.5,14.5),breaks=4:20) +
   scale_y_continuous(expand=c(0.05,0)) +
   geom_bar(color="black",fill="gray50") +
-  facet_wrap(~regionL,ncol=1,scales="free_y") +
+  facet_wrap(~regL2,ncol=1,scales="free_y") +
   labs(x="Consensus Otolith Age",y="Frequency")
 dev.off()

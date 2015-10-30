@@ -3,44 +3,20 @@
 ## Initial data manipulation for Kiyi Age & Growth Project  ##
 ##  This is sourced by the other scripts.                   ##
 ##                                                          ##
-##  1. Load packages needed here and in other scripts       ##
-##  2. Set up colors and names for the regions              ##
-##  3. Read and manipulate ageing data.frame                ##
-##  4. Read and manipulate length frequency data.frame      ##
-##  5. Read and manipulate station information data.frame   ##
-##  6. Basic summaries                                      ##
-##  7. Make a histogram ggplot2 theme                       ##
+##  1. Read and manipulate ageing data.frame                ##
+##  2. Read and manipulate station information data.frame   ##
+##  3. Load the length frequency analysis script            ##
+##  4. Basic summaries                                      ##
 ##                                                          ##
 ##############################################################
 
 # clear workspace and console
 rm(list=ls()); cat("\014")
+# load the helpers
+source("aaaInit.R")
 
 ##############################################################
-##  1. Load packages needed here and in other scripts       ##
-##############################################################
-library(readxl)    # reading data
-library(FSA)       # mapvalues, filterD
-library(lubridate) # to handle dates
-library(ggplot2)
-library(nnet)      # multinom
-library(Matching)  # ks.boot
-library(magrittr)  # for %<>%
-library(dplyr)     # manipulating data
-
-
-##############################################################
-##  2. Set up colors and names for the regions              ##
-##############################################################
-regS <- c("West","Isle","North","South","East")
-regL <- c("Western Arm","Isle Royale","Northern Ontario",
-          "Southern Ontario","Eastern Michigan")
-clrs <- c("black","blue","green","orange","red")
-names(clrs) <- regS
-
-
-##############################################################
-##  3. Read and manipulate main data file                   ##
+##  1. Read and manipulate main data file                   ##
 ##############################################################
 # add 10-mm length categories
 # add log10 of weight and length
@@ -50,60 +26,13 @@ names(clrs) <- regS
 kiyiAge <- read_excel("data/KIYILepak_2014.xlsx",sheet="Ageing") %>%
   mutate(lcat10=lencat(tl,w=10),
          logW=log10(wt),logL=log10(tl),
-         region=factor(region,levels=regS),
-         regionL=factor(mapvalues(region,regS,regL),levels=regL),
+         region=factor(mapvalues(region,regSold,regS),levels=regS),
+         regL=factor(mapvalues(region,regS,regL),levels=regL),
          sex=factor(mapvalues(sex,from=c(0,1,2),to=c("juvenile","male","female"))))
 
 
-
 ##############################################################
-##  4. Read and manipulate length frequency data.frame      ##
-##############################################################
-# Load the raw LF data that came from USGS and clean ...
-#   Use only those records with use==1 (TRUE),
-#   Handle dates (create year and month variables),
-#   Rename some variables so not all caps
-#   make region a factor variable
-#   Create an average depth
-#   Remove unused variables
-kiyiLF <- read_excel("data/KIYILepak_2014.xlsx",sheet="LenFreq") %>%
-  filterD(Use==1) %>%
-  setNames(tolower(names(.))) %>%
-  mutate(op_date=ymd(op_date),
-         year=year(op_date),
-         year=ifelse(year>2020,year-100,year),
-         fyear=factor(year),
-         mon=month(op_date,label=TRUE),
-         tl=length,
-         region=factor(region,levels=regS),
-         regionL=factor(mapvalues(region,regS,regL),levels=regL)) %>%
-  select(-c(op_id,op_date,serial,cruise,target,tr_design,
-            beg_depth,end_depth,use,usenotes))
-
-# Expend the raw LF data ... the raw LF data are recorded as the
-#   frequency of fish for each length by year.  These data
-#   must be expanded to individual lengths for each year.
-#     Repeat row index as many times as TotalCount
-#     Make a new data.frame with those row indices (will repeat as necessary)
-#     Drop the "ActualCount" and "TotalCount" columns
-# Removed fish captured prior to 1992 because small sample sizes.
-# Added a 5-mm length category variale
-reprows <- rep(1:nrow(kiyiLF),kiyiLF$totalcount)
-kiyiLF <- kiyiLF[reprows,] %>%
-  select(-c(actualcount,totalcount)) %>%
-  filterD(year>=1992) %>%
-  mutate(lcat5=lencat(tl,w=5)) %>%
-  as.data.frame()
-
-# Get the LF data for only 2014 ... Restrict to Jun-Jul
-kiyiLF14 <- kiyiLF %>%
-  filterD(year==2014,mon %in% c("Jun","Jul")) %>%
-  as.data.frame()
-
-
-
-##############################################################
-##  5. Read stations information data.frame                 ##
+##  2. Read stations information data.frame                 ##
 ##############################################################
 # renamed to lower_case
 # handled dates and regions
@@ -115,7 +44,7 @@ kiyiStations <- read_excel("data/KIYILepak_2014.xlsx",sheet="Stations") %>%
          year=year(op_date),
          year=ifelse(year>2020,year-100,year),
          mon=month(op_date,label=TRUE),
-         region=factor(region,levels=regS),
+         region=factor(mapvalues(region,regSold,regS),levels=regS),
          regionL=factor(mapvalues(region,regS,regL),levels=regL),
          type=factor(type)) %>%
   select(-op_date) %>%
@@ -125,7 +54,42 @@ kiyiStations <- read_excel("data/KIYILepak_2014.xlsx",sheet="Stations") %>%
 
 
 ##############################################################
-##  6. Basic Summaries                                      ##
+##  3. Read the length frequency analysis script            ##
+##     brings in kiyiLF14 data.frame                        ##
+##############################################################
+# Read the raw LF data from
+kiyiLF <- read_excel("data/LF_2001_14_forMark_corrected.xlsx") %>%
+  filter(use=="yes") %>%
+  mutate(region=mapvalues(region,regSold,regS),
+         region=factor(region,levels=regS),
+         regL=mapvalues(region,regS,regL),
+         fyear=factor(year),
+         region=factor(region),
+         mon=factor(mon)) %>%
+  select(-c(op_id,op_date,serial,cruise,target,use,tr_design,
+            beg_depth,end_depth,year))
+
+# Expend the raw LF data ... the raw LF data are recorded as the
+#   frequency of fish for each length by year.  These data
+#   must be expanded to individual lengths for each year.
+#     Repeat row index as many times as TotalCount
+#     Make a new data.frame with those row indices (will repeat as necessary)
+#     Drop the "ActualCount" and "TotalCount" columns
+# Added a 5-mm length category variale
+reprows <- rep(1:nrow(kiyiLF),kiyiLF$totalcount)
+kiyiLF <- kiyiLF[reprows,] %>%
+  select(-c(actualcount,totalcount)) %>%
+  mutate(lcat5=lencat(tl,w=5)) %>%
+  as.data.frame()
+
+# Get just 2014 (also remove fish from location==2 (only May sample))
+kiyiLF14 <- kiyiLF %>%
+  filterD(fyear==2014,location!=2)
+
+
+
+##############################################################
+##  4. Basic Summaries                                      ##
 ##############################################################
 # Number of locations where Kiyi were captured
 nrow(kiyiStations)
@@ -165,27 +129,3 @@ xtabs(~lcat10+sex+region,data=filterD(kiyiAge,!is.na(otoAge)))
 prop.table(octbl)*100
 # find proportion of useable that were unreadable
 prop.table(octbl[-2])*100
-
-
-##############################################################
-##  7. Make some ggplot2 themes                             ##
-##############################################################
-theme_kiyi <- function (base_size = 12, base_family = "") {
-  theme_bw(base_size=base_size,base_family=base_family) +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor=element_blank(),
-        panel.border = element_rect(color="black",size=1.25),
-        strip.background = element_rect(color="black",size=1.25),
-        strip.text=element_text(face="bold",size=11),
-        axis.text=element_text(size=14),
-        axis.title=element_text(size=18),
-        axis.title.x=element_text(margin=margin(8,0,0,0)),
-        axis.title.y=element_text(margin=margin(0,16,0,0)),
-        legend.title=element_blank(),
-        legend.text=element_text(size=14))
-}
-
-theme_mhist <- function (base_size = 12, base_family = "") {
-  theme_kiyi(base_size=base_size,base_family=base_family) +
-  theme(axis.text.y=element_blank())
-}

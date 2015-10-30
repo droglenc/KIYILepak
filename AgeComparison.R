@@ -10,6 +10,7 @@
 # clear workspace and console
 rm(list=ls()); cat("\014")
 
+
 ##############################################################
 ## 1. Prepare data for comparisons                          ##
 ##############################################################
@@ -23,6 +24,7 @@ nrow(kiyiOO)
 kiyiOS <- kiyiAge[complete.cases(kiyiAge[,c("scaleAge","otoAge_TAL")]),]
 # get sample size
 nrow(kiyiOS)
+
 
 
 ##############################################################
@@ -71,7 +73,8 @@ summary(ab.tA1,what="table")
 summary(ab.tA1,what="symmetry")
 
 # Publication quality graphic
-png("manuscript/Figs/FigureX_ScaleOtoComp.PNG",width=4.5,height=4.5,units="in",pointsize=14,family="sans",res=600)
+png("manuscript/Figs/FigureX_ScaleOtoComp.PNG",width=4.5,height=4.5,
+    units="in",pointsize=14,family="sans",res=600)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.7,0.5,0),tcl=-0.2,las=1)
 plot(ab.tA1,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="gray",
      lwd.agree=1,xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
@@ -79,5 +82,3 @@ plot(ab.tA1,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="gray",
 axis(2,seq(-10,0,1))
 axis(1,seq(4,16,2))
 dev.off()
-
-

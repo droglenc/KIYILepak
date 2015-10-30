@@ -12,6 +12,7 @@
 # clear workspace and console
 rm(list=ls()); cat("\014")
 
+
 ##############################################################
 ## 1. Prepare data for comparisons                          ##
 ##############################################################
@@ -32,10 +33,10 @@ tmp <- filterD(tmp,otoAge<13)
 
 # Create region-specific data
 West  <- filterD(tmp,region=="West")
-East  <- filterD(tmp,region=="East")
-North <- filterD(tmp,region=="North")
-South <- filterD(tmp,region=="South")
-Isle  <- filterD(tmp,region=="Isle")
+NoMich  <- filterD(tmp,region=="NoMich")
+NoOnt <- filterD(tmp,region=="NoOnt")
+SoOnt <- filterD(tmp,region=="SoOnt")
+EastMich  <- filterD(tmp,region=="EastMich")
 
 
 
@@ -46,22 +47,22 @@ Isle  <- filterD(tmp,region=="Isle")
 west1 <- multinom(otoAge~lcat10,data=West,maxit=500)
 west2 <- multinom(otoAge~lcat10*sex,data=West,maxit=500)
 tmpW <- anova(west1,west2)
-# East Comparison
-east1 <- multinom(otoAge~lcat10,data=East,maxit=500)
-east2 <- multinom(otoAge~lcat10*sex,data=East,maxit=500)
-tmpE <- anova(east1,east2)
-# North Comparison
-north1 <- multinom(otoAge~lcat10,data=North,maxit=500)
-north2 <- multinom(otoAge~lcat10*sex,data=North,maxit=500)
-tmpN <- anova(north1,north2)
-# South Comparison
-south1 <- multinom(otoAge~lcat10,data=South,maxit=500)
-south2 <- multinom(otoAge~lcat10*sex,data=South,maxit=500)
-tmpS <- anova(south1,south2)
-# Isle Comparison
-isle1 <- multinom(otoAge~lcat10,data=Isle,maxit=500)
-isle2 <- multinom(otoAge~lcat10*sex,data=Isle,maxit=500)
-tmpI <- anova(isle1,isle2)
+# EastMich Comparison
+EastMich1 <- multinom(otoAge~lcat10,data=EastMich,maxit=500)
+EastMich2 <- multinom(otoAge~lcat10*sex,data=EastMich,maxit=500)
+tmpE <- anova(EastMich1,EastMich2)
+# NoOnt Comparison
+NoOnt1 <- multinom(otoAge~lcat10,data=NoOnt,maxit=500)
+NoOnt2 <- multinom(otoAge~lcat10*sex,data=NoOnt,maxit=500)
+tmpN <- anova(NoOnt1,NoOnt2)
+# SoOnt Comparison
+SoOnt1 <- multinom(otoAge~lcat10,data=SoOnt,maxit=500)
+SoOnt2 <- multinom(otoAge~lcat10*sex,data=SoOnt,maxit=500)
+tmpS <- anova(SoOnt1,SoOnt2)
+# NoMich Comparison
+NoMich1 <- multinom(otoAge~lcat10,data=NoMich,maxit=500)
+NoMich2 <- multinom(otoAge~lcat10*sex,data=NoMich,maxit=500)
+tmpNM <- anova(NoMich1,NoMich2)
 
 # Sexes combined across all regions
 mod1 <- multinom(otoAge~lcat10,data=tmp,maxit=500)
@@ -69,8 +70,8 @@ mod2 <- multinom(otoAge~lcat10*sex,data=tmp,maxit=500)
 tmpSex <- anova(mod1,mod2)
 
 # Visualize comparison by sex in one region
-tmpM <- xtabs(~lcat10+otoAge,data=filter(East,sex=="male"))
-tmpF <- xtabs(~lcat10+otoAge,data=filter(East,sex=="female"))
+tmpM <- xtabs(~lcat10+otoAge,data=filter(EastMich,sex=="male"))
+tmpF <- xtabs(~lcat10+otoAge,data=filter(EastMich,sex=="female"))
 alkPlot(tmpF,type="bubble",col=rgb(1,0,0,1/3),ylim=c(4,12))
 alkPlot(tmpM,type="bubble",col=rgb(0,0,1,1/3),add=TRUE)
 
@@ -90,15 +91,15 @@ tmpReg <- anova(mod3,mod4)
 
 # Visualize by region --- Not very useful
 (tmpWdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="West")))
-tmpEdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="East"))
-tmpNdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="North"))
-tmpSdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="South"))
-tmpIdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="Isle"))
+tmpEdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="EastMich"))
+tmpNdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="NoOnt"))
+tmpSdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="SoOnt"))
+tmpNMdf <- xtabs(~lcat10+otoAge,data=filter(tmp,region=="NoMich"))
 alkPlot(tmpWdf,type="bubble",col=rgb(1,0,0,1/3),xlim=c(140,240),ylim=c(4,12))
 alkPlot(tmpEdf,type="bubble",col=rgb(0,0,1,1/3),add=TRUE)
 alkPlot(tmpNdf,type="bubble",col=rgb(0,1,0,1/3),add=TRUE)
 alkPlot(tmpSdf,type="bubble",col=rgb(1,0,1,1/3),add=TRUE)
-alkPlot(tmpIdf,type="bubble",col=rgb(1,1,0,1/3),add=TRUE)
+alkPlot(tmpNMdf,type="bubble",col=rgb(1,1,0,1/3),add=TRUE)
 
 
 ##############################################################
@@ -108,12 +109,13 @@ alkPlot(tmpIdf,type="bubble",col=rgb(1,1,0,1/3),add=TRUE)
 res <- data.frame(Comparison=c(paste("By sex within",regS),
                                "By sex, Pooled regions","By region, Pooled sexes"),
            df1   =c(tmpW$'   Df'[2],tmpE$'   Df'[2],tmpN$'   Df'[2],tmpS$'   Df'[2],
-                    tmpI$'   Df'[2],tmpSex$'   Df'[2],tmpReg$'   Df'[2]),
+                    tmpNM$'   Df'[2],tmpSex$'   Df'[2],tmpReg$'   Df'[2]),
            df2   =c(tmpW$'Resid. df'[2],tmpE$'Resid. df'[2],tmpN$'Resid. df'[2],
-                    tmpS$'Resid. df'[2],tmpI$'Resid. df'[2],tmpSex$'Resid. df'[2],
+                    tmpS$'Resid. df'[2],tmpNM$'Resid. df'[2],tmpSex$'Resid. df'[2],
                     tmpReg$'Resid. df'[2]),
            pvalue=c(tmpW$'Pr(Chi)'[2],tmpE$'Pr(Chi)'[2],tmpN$'Pr(Chi)'[2],
-                    tmpS$'Pr(Chi)'[2],tmpI$'Pr(Chi)'[2],tmpSex$'Pr(Chi)'[2],tmpReg$'Pr(Chi)'[2]))
+                    tmpS$'Pr(Chi)'[2],tmpNM$'Pr(Chi)'[2],tmpSex$'Pr(Chi)'[2],
+                    tmpReg$'Pr(Chi)'[2]))
 res
 
 
