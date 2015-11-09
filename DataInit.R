@@ -93,6 +93,8 @@ kiyiLF14 <- kiyiLF %>%
 ##############################################################
 # Number of locations where Kiyi were captured
 nrow(kiyiStations)
+xtabs(~region,data=kiyiStations)    ## in Table 2
+
 # Summarize depths & distances for nearshore cross-contour tows (82 & 84)
 tmp <- filterD(kiyiStations,type=="nearshore")
 Summarize(~beg_depth,data=tmp,digits=0)
@@ -105,15 +107,14 @@ Summarize(~distance,data=tmp,digits=2)
 
 # basic length summary of the entire sample (for the manuscript)
 Summarize(~tl,data=kiyiLF14,digits=2)
+Summarize(tl~region,data=kiyiLF14,digits=2)   ## in Table 2
 
 # basic length summary of the subsample (not in the manuscript)
 Summarize(~tl,data=kiyiAge,digits=2)
 
-# sex ratio summary of the subsample for the manuscript
+# sex ratio summary of the subsample
 xtabs(~region+sex,data=kiyiAge)
-prop.table(xtabs(~sex,data=filterD(kiyiAge,sex!="juvenile")))*100
-sextbl <- xtabs(~region+sex,data=filterD(kiyiAge,sex!="juvenile"))
-chisq.test(sextbl)
+
 
 # Examine the subsampling scheme (in theory there should be 5
 # fish per 10-mm length bin for each sex within each region ...
