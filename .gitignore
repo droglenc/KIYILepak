@@ -1,22 +1,16 @@
 # Data files (so that they are not in a public repo)
-data/*.xlsx
-data/*.csv
+data/
 
-# Old files that don't need to be version controlled
+# Old or temporary files that don't need to be version controlled
 zzzOld/
-
-# temportary or old files related to the manuscript
-manuscript/.tmp
-manuscript/zzzOld
-manuscript/*~*
+doc/.tmp
+doc/*~*
 
 # Files in the literature_resources
-literature_resources/*~*
+doc/literature_resources/*~*
 
-# History files
+# R related files
 .Rhistory
-
-# R data files from past sessions
 .Rdata
 .Rproj.user
 
