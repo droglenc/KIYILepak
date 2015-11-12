@@ -1,7 +1,4 @@
 ---
-title: "Kiyi Age & Size Results"
-author: "Taylor A. Lepak, Derek H. Ogle, Mark R. Vinson"
-date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: word_document
 ---
 ```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
@@ -9,29 +6,13 @@ output: word_document
 source("code/aaaInit.R")
 ## Set random seed ... bootstraps and ALKs will be the same each time
 set.seed(34783475)
+
 ## Show intermediate results or not
 show.res <- 'hide'  # 'asis' or 'hide'
+show.msg <- ifelse(show.res=='hide',FALSE,TRUE)
+## Make plots upon knitting
+makePlots <- TRUE
 ```
-
-# Methods
-```{r echo=FALSE, results='hide'}
-sta <- read.csv("data/clean/stations.csv")
-
-# Summarize depths & distances for nearshore cross-contour tows (82 & 84)
-sta_ns <- filterD(sta,type=="nearshore")
-sta_ns_begdep <- Summarize(~beg_depth,data=sta_ns)
-sta_ns_enddep <- Summarize(~end_depth,data=sta_ns)
-sta_ns_dist <- Summarize(~distance,data=sta_ns)
-# Summarize depths for offshore along-contour tows (not 82 & 84)
-sta_os <- filterD(sta,type=="offshore")
-sta_os_avgdep <- Summarize(~avg_depth,data=sta_os)
-sta_os_dist <- Summarize(~distance,data=sta_os)
-```
-
-The June tows were cross-contour with a mean beginning depth of `r formatC(sta_ns_begdep[["mean"]],format="f",digits=0)` m (range: `r formatC(sta_ns_begdep[["min"]],format="f",digits=0)`-`r formatC(sta_ns_begdep[["max"]],format="f",digits=0)`), ending depth of `r formatC(sta_ns_enddep[["mean"]],format="f",digits=0)` m (range: `r formatC(sta_ns_enddep[["min"]],format="f",digits=0)`-`r formatC(sta_ns_enddep[["max"]],format="f",digits=0)`), and distance covered of `r formatC(sta_ns_dist[["mean"]],format="f",digits=2)` km (range: `r formatC(sta_ns_dist[["min"]],format="f",digits=2)`-`r formatC(sta_ns_dist[["max"]],format="f",digits=2)`).  The tows in July followed a depth contour, had a mean average depth of `r formatC(sta_os_avgdep[["mean"]],format="f",digits=0)` m (range: `r formatC(sta_os_avgdep[["min"]],format="f",digits=0)`-`r formatC(sta_os_avgdep[["max"]],format="f",digits=0)`), and a mean distance covered of `r formatC(sta_os_dist[["mean"]],format="f",digits=2)` km (range: `r formatC(sta_os_dist[["min"]],format="f",digits=2)`-`r formatC(sta_os_dist[["max"]],format="f",digits=2)`).
-
-
-# Results
 
 ```{r echo=FALSE, results='hide'}
 lf14 <- read.csv("data/clean/lenfreq_2014.csv") %>%
@@ -42,7 +23,7 @@ lf14 <- read.csv("data/clean/lenfreq_2014.csv") %>%
 lf14_sum <- Summarize(~tl,data=lf14)
 ```
 
-```{r echo=FALSE, results=show.res, fig.show='hide', message=show.res}
+```{r echo=FALSE, results=show.res, fig.show='hide', message=show.msg}
 ##  Examine Length Frequency by Region
 # Split by region for comparisons below
 lf14_west  <- filterD(lf14,region=="West") %>% as.data.frame()
@@ -78,7 +59,7 @@ ggplot(lf14,aes(tl,color=region)) +
   labs(x="Total Length (mm)",y="Cumulative Density") +
   scale_color_manual(values=clrs)
 ```
-```{r echo=FALSE, results=show.res, message=show.res}
+```{r echo=FALSE, results=show.res, message=show.msg}
 ## ANOVA for tl
 lf14_levtest <- leveneTest(tl~region,data=lf14)
 lf14_aov.lm <- lm(tl~region,data=lf14)
@@ -107,47 +88,9 @@ sex_freq2 <- xtabs(~sex,data=filterD(bio,sex!="juvenile"))
 sex_perc2 <- prop.table(sex_freq2)*100
 ```
 
-```{r echo=FALSE, results='hide', fig.show='hide', warning=FALSE}
-## Produces FIGURE 2
-png("results/figures/Figure2_LenFreq14Reg.PNG",width=6.5,height=6.5,
-    units="in",pointsize=24,family="sans",res=600)
-ggplot(lf14,aes(x=tl)) +
-  theme_mhist() +
-  scale_x_continuous(expand=c(0.02,0),limits=c(140,280),breaks=seq(0,275,25)) +
-  scale_y_continuous(expand=c(0,0),limits=c(0,1.2)) +
-  geom_histogram(aes(y=..ncount..),binwidth=5,fill="gray50",color="black") +
-  facet_wrap(~regionL,nrow=1,dir="v") +
-  labs(x="Total Length (mm)",y="Relative Frequency")
-dev.off()
-```
+A total of `r formatC(lf14_sum[["n"]],format="f",digits=0)` Kiyi were sampled in 2014.  These fish were between `r formatC(lf14_sum[["min"]],format="f",digits=0)` and `r formatC(lf14_sum[["max"]],format="f",digits=0)` mm TL with a mean (SD) TL of `r formatC(lf14_sum[["mean"]],format="f",digits=0)` (`r formatC(lf14_sum[["sd"]],format="f",digits=1)`) mm.  The length distribution of Kiyi from the Northern Ontario region differed significantly from the length distributions of Kiyi captured from all other regions (p < `r kPvalue(ks_max.sig.p,digits=3,include.p=FALSE)`), which did not differ (p > `r kPvalue(ks_min.nsig.p,digits=3,include.p=FALSE)`).  The Northern Ontario region had fewer longer fish, which resulted in a significantly shorter mean TL (p < `r kPvalue(lf14_smc_max.sig.p,digits=3,include.p=FALSE)`; Figure 2).  In the subsample of `r sum(sex_freq)` fish, `r kCounts(sex_freq["juvenile"])` were juveniles and `r formatC(sex_perc2["female"],format="f",digits=1)`% of non-juvenile fish were female.
 
-A total of `r formatC(lf14_sum[["n"]],format="f",digits=0)` Kiyi were sampled in 2014.  These fish were between `r formatC(lf14_sum[["min"]],format="f",digits=0)` and `r formatC(lf14_sum[["max"]],format="f",digits=0)` mm TL with a mean (SD) TL of `r formatC(lf14_sum[["mean"]],format="f",digits=0)` (`r formatC(lf14_sum[["sd"]],format="f",digits=1)`) mm.  The length distribution of Kiyi from the Northern Ontario region differed significantly from the length distributions of Kiyi captured from all other regions (p<`r formatC(ks_max.sig.p,format="f",digits=3)`), which did not differ (p>`r formatC(ks_min.nsig.p,format="f",digits=3)`).  The Northern Ontario region had fewer longer fish, which resulted in a significantly shorter mean TL (p<`r formatC(lf14_smc_max.sig.p,format="f",digits=3)`; Figure 2).  In the subsample of `r sum(sex_freq)` fish, `r kCounts(sex_freq["juvenile"])` were juveniles and `r formatC(sex_perc2["female"],format="f",digits=1)`% of non-juvenile fish were female.
-
-```{r eval=FALSE, echo=FALSE, results='hide', fig.show='hide', warning=FALSE}
-## Produces FIGURE 3
-lf <- read.csv("data/clean/lenfreq_all.csv") %>%
-  mutate(year=factor(year))
-
-png("results/figures/Figure3_LFProgression.PNG",width=6.5,height=9,
-    units="in",pointsize=24,family="sans",res=600)
-lvls <- levels(lf$year)
-ggplot(lf,aes(x=tl)) +
-  theme_mhist() +
-  scale_x_continuous(expand=c(0.02,0),limits=c(40,305),breaks=seq(0,350,50)) +
-  scale_y_continuous(expand=c(0,0),limits=c(0,1.2)) +
-  geom_histogram(aes(y=..ncount..),binwidth=5,fill="gray50",color="black") +
-  facet_wrap(~year,nrow=2,dir="v") +
-  labs(x="Total Length (mm)",y="Relative Frequency") +
-  geom_text(aes(y=0.9),data=data.frame(tl=110,year=factor(lvls[4],levels=lvls)),
-            label="11",size=5) +
-  geom_text(aes(y=0.4),data=data.frame(tl=95,year=factor(lvls[6],levels=lvls)),
-            label="9",size=5) +
-  geom_text(aes(y=0.65),data=data.frame(tl=90,year=factor(lvls[10],levels=lvls)),
-            label="5",size=5)
-dev.off()
-```
-
-The examination of length frequencies from 2001 through 2014 revealed distinct modes near 80-100 mm in 2004, 2006, and 2010 (Figure 3).  These modes corresponded to age-1 fish as Kiyi hatch at approximately 20 mm in early spring (CITATION).  Thus, these cohorts corresponded to ages 11, 9, and 5, respectively, in 2014.  There was little evidence for the 2005 cohort in 2007 which suggests few age-9 fish may exist in 2014.
+The examination of length frequencies from 2001 through 2014 revealed distinct modes near 80-100 mm in 2004, 2006, and 2010 (Figure 3).  These modes corresponded to age-1 fish as Kiyi likely hatch at a size (10-12 mm) and time (early spring) similar to cisco (Oyadomari and Auer, 2007; Oyadomari and Auer, 2008).  Thus, these cohorts corresponded to ages 11, 9, and 5, respectively, in 2014.  There was little evidence for the 2005 cohort in 2007 which suggests few age-9 fish may exist in 2014.
 
 ```{r echo=FALSE, results='hide'}
 # summary of the otolith characteristics
@@ -158,7 +101,7 @@ octbl_perc <- prop.table(octbl)*100
 octbl2 <- octbl[-2]
 octbl2_perc <- prop.table(octbl2)*100
 ```
-```{r echo=FALSE, results=show.res, message=show.res}
+```{r echo=FALSE, results=show.res, message=show.msg}
 cat("Between-reader otolith comparisons (TAL v. DHO ages)")
 bio_OO <- filterD(bio,otoChar=="USEABLE")
 
@@ -172,17 +115,7 @@ ap_OO_psum <- summary(ap_OO,what="precision")
 ( ap_OO_pdiff1 <- summary(ap_OO,what="absolute difference",trunc.diff=2) )
 ```
 
-```{r echo=FALSE, results='hide', message='hide'}
-png("results/figures/Figure4_OtoOtoComp.PNG",width=4.5,height=4.5,units="in",pointsize=14,family="sans",res=600)
-par(mar=c(3,3,0.5,0.5),mgp=c(1.7,0.5,0),tcl=-0.2,las=1)
-plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="gray",yaxt="n",
-     lwd.agree=1,xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
-     show.pts=TRUE,transparency=1/15,ylab="Second Reader",xlab="First Reader")
-axis(2,seq(-3,2,1))
-dev.off()
-```
-
-```{r echo=FALSE, results=show.res, message=show.res}
+```{r echo=FALSE, results=show.res, message=show.msg}
 cat("Otolith-scales comparisons (only TAL ages)")
 bio_OS <- bio[complete.cases(bio[,c("scaleAge","otoAge_TAL")]),]
 ab_OS <- ageBias(scaleAge~otoAge_TAL,data=bio_OS,
@@ -191,21 +124,9 @@ ab_OS_bsum <- summary(ab_OS,what="bias")
 ab_OS_bsym <- summary(ab_OS,what="symmetry")
 ```
 
-```{r echo=FALSE, results='hide', message='hide'}
-png("results/figures/Figure5_ScaleOtoComp.PNG",width=4.5,height=4.5,
-    units="in",pointsize=14,family="sans",res=600)
-par(mar=c(3,3,0.5,0.5),mgp=c(1.7,0.5,0),tcl=-0.2,las=1)
-plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="gray",
-     lwd.agree=1,xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
-     show.pts=TRUE,transparency=1/5)
-axis(2,seq(-10,0,1))
-axis(1,seq(4,16,2))
-dev.off()
-```
+Ages were estimated by two readers from `r sum(octbl2)` thin-sectioned otoliths.  Of these otoliths, `r octbl2["UNREADABLE"]` (`r formatC(octbl2_perc["UNREADABLE"],format="f",digits=1)`%) were deemed unreadable (cracked or cloudy image) and were removed from further consideration.  Ages estimated from the two readers perfectly agreed for `r formatC(ap_OO_pdiff1[["0"]],format="f",digits=1)`% of the otoliths, agreed within one year for `r formatC(100-ap_OO_pdiff1[["2+"]],format="f",digits=1)`% of the otoliths, had a between-reader ACV of `r formatC(ap_OO_psum[["ACV"]],format="f",digits=1)`, and showed no significant systematic bias (`r kPvalue(ab_OO_bsym[2,"p"],digits=3)`; Figure 4).  However, the mean estimated age for the second reader was slightly greater when the first reader estimated an age of 5 (95% CI: `r formatC(ab_OO_bsum[2,"LCI"],format="f",digits=1)`-`r formatC(ab_OO_bsum[2,"UCI"],format="f",digits=1)`; `r kPvalue(ab_OO_bsum[2,"adj.p"],digits=3)`) and slightly lower when the first reader estimated an age of 12 (95% CI: `r formatC(ab_OO_bsum[9,"LCI"],format="f",digits=1)`-`r formatC(ab_OO_bsum[9,"UCI"],format="f",digits=1)`; `r kPvalue(ab_OO_bsum[9,"adj.p"],digits=3)`).  Mean scale age for each otolith age was less than the otolith age for all observed otolith ages with adequate sample sizes (p < `r kPvalue(max(ab_OS_bsum[,"adj.p"],na.rm=TRUE),digits=3,include.p=FALSE)`; Figure 5).
 
-Ages were estimated by two readers from `r sum(octbl2)` thin-sectioned otoliths.  Of these otoliths, `r octbl2["UNREADABLE"]` (`r formatC(octbl2_perc["UNREADABLE"],format="f",digits=1)`%) were deemed unreadable (cracked or cloudy image) and were removed from further consideration.  Ages estimated from the two readers perfectly agreed for `r formatC(ap_OO_pdiff1[["0"]],format="f",digits=1)`% of the otoliths, agreed within one year for `r formatC(100-ap_OO_pdiff1[["2+"]],format="f",digits=1)`% of the otoliths, had a between-reader ACV of `r formatC(ap_OO_psum[["ACV"]],format="f",digits=1)`, and showed no significant systematic bias (p=`r formatC(ab_OO_bsym[2,"p"],format="f",digits=3)`; Figure 4).  However, the mean estimated age for the second reader was slightly greater when the first reader estimated an age of 5 (95% CI: `r formatC(ab_OO_bsum[2,"LCI"],format="f",digits=1)`-`r formatC(ab_OO_bsum[2,"UCI"],format="f",digits=1)`; p<0.001) and slightly lower when the first reader estimated an age of 12 (95% CI: `r formatC(ab_OO_bsum[9,"LCI"],format="f",digits=1)`-`r formatC(ab_OO_bsum[9,"UCI"],format="f",digits=1)`; p=`r formatC(ab_OO_bsum[9,"adj.p"],format="f",digits=1)`).  Mean scale age for each otolith age was less than the otolith age for all observed otolith ages with adequate sample sizes (p<`r formatC(max(ab_OS_bsum[,"adj.p"],na.rm=TRUE),format="f",digits=3)`; Figure 5).
-
-```{r echo=FALSE, results=show.res, message=show.res}
+```{r echo=FALSE, results=show.res, message=show.msg}
 # Remove juvenile fish (same as removing all fish <140 mm)
 #   and those without otoages
 bio_ALK <- filterD(bio,sex!="juvenile",!is.na(otoAge))
@@ -277,7 +198,7 @@ alkcomp_res <- data.frame(Comparison=c(paste("By sex within",regS),
                     alkcomp_reg$'Pr(Chi)'[2]))
 alkcomp_res
 ```
-```{r echo=FALSE, results=show.res, message=show.res}
+```{r echo=FALSE, results=show.res, message=show.msg}
 # Get raw LF 2014 data, restrict to fish >= 140 mm, and add an
 # otoAge variable to record the new ages
 lf14_ages <- lf14 %>%
@@ -286,9 +207,9 @@ lf14_ages <- lf14 %>%
   as.data.frame()
 ```
 
-Kiyi for which a consensus otolith age estimate was obtained were used to generate ALKs.  Four Kiyi less than 140 mm TL (all of the juvenile fish) were excluded from all ALK analyses because of sample size considerations.  An additional `r kCounts(bio_alk_numremoved)` fish that were estimated to be age-13 or older were also removed from the analysis that compared ALKs among regions because of sample size considerations.  Age-length keys did not differ significantly between sexes within any region (p>`r formatC(min(alkcomp_res$pvalue[1:5]),format="f",digits=3)`) or among regions when sexes were pooled (p=`r formatC(alkcomp_res$pvalue[7],format="f",digits=3)`).  Despite this finding, to minimize the loss of any regional differences in the relationship between age and length, region-specific observed age-length keys were generated and used to assign ages by region to the `r nrow(lf14_ages)` sampled Kiyi that were longer than 140 mm.
+Kiyi for which a consensus otolith age estimate was obtained were used to generate ALKs.  Four Kiyi less than 140 mm TL (all of the juvenile fish) were excluded from all ALK analyses because of sample size considerations.  An additional `r kCounts(bio_alk_numremoved)` fish that were estimated to be age-13 or older were also removed from the analysis that compared ALKs among regions because of sample size considerations.  Age-length keys did not differ significantly between sexes within any region (p > `r kPvalue(min(alkcomp_res$pvalue[1:5]),digits=3,include.p=FALSE)`) or among regions when sexes were pooled (`r kPvalue(alkcomp_res$pvalue[7],digits=3)`).  Despite this finding, to minimize the loss of any regional differences in the relationship between age and length, region-specific observed age-length keys were generated and used to assign ages by region to the `r nrow(lf14_ages)` sampled Kiyi that were longer than 140 mm.
 
-```{r echo=FALSE, results=show.res, message=show.res, warning=FALSE}
+```{r echo=FALSE, results=show.res, message=show.msg, warning=FALSE}
 ## Create region-specific data
 West  <- filterD(bio_ALK,region=="West")
 NoMich  <- filterD(bio_ALK,region=="NoMich")
@@ -342,22 +263,11 @@ colnames(age_freq2)[c(1,ncol(age_freq2))] <- c("<6",">11")
 # Made ages <6,6,7,8,9,10,11,>11 in groups
 ( OA.chi <- chisq.test(age_freq2) )
 ```
-```{r echo=FALSE, results=show.res, messages=show.res, warning=FALSE}
-png("results/figures/Figure6_AgeFreq.PNG",width=6.5,height=6.5,
-    units="in",pointsize=24,family="sans",res=600)
-ggplot(data=lf14_ages,aes(x=otoAge)) +
-  theme_kiyi() +
-  scale_x_continuous(expand=c(0.02,0),limits=c(3.5,14.5),breaks=4:20) +
-  scale_y_continuous(expand=c(0.05,0)) +
-  geom_bar(color="black",fill="gray50") +
-  facet_wrap(~regionL,ncol=1,scales="free_y") +
-  labs(x="Consensus Otolith Age",y="Frequency")
-dev.off()
-```
 
-The age distribution was bimodal in each region (Figure 6) with an upper mode centered at age-11 in all five regions and a lower mode that consisted of nearly equal numbers of age-5 and age-6 fish in all regions except for Eastern Michigan where there were nearly twice as many age-5 as age-6 fish.  The age distribution, after age-4 and 5 fish were pooled and age-11 and older fish were pooled within each region for sample size reasons, differed significantly among regions (p<0.001).  Variability around the age-11 mode and the relative frequency of intermediate aged (ages 7-9) fish appeared to explain much of the difference in age distribution among regions.
 
-```{r echo=FALSE, results=show.res, message=show.res}
+The age distribution was bimodal in each region (Figure 6) with an upper mode centered at age-11 in all five regions and a lower mode that consisted of nearly equal numbers of age-5 and age-6 fish in all regions except for Eastern Michigan where there were nearly twice as many age-5 as age-6 fish.  The age distribution, after age-4 and 5 fish were pooled and age-11 and older fish were pooled within each region for sample size reasons, differed significantly among regions (`r kPvalue(OA.chi$p.value,digits=3)`).  Variability around the age-11 mode and the relative frequency of intermediate aged (ages 7-9) fish appeared to explain much of the difference in age distribution among regions.
+
+```{r echo=FALSE, results=show.res, message=show.msg}
 bio_LW <- filterD(bio,sex!="juvenile",!is.na(wt),!is.na(tl))
 
 ## Separate regressions
@@ -391,7 +301,7 @@ lw_allregs <- lw_allregs[,c(1:4,6,5)]
 names(lw_allregs)[5:6] <- c("b","log(a)")
 ```
 
-```{r echo=FALSE, results=show.res, message=show.res}
+```{r echo=FALSE, results=show.res, message=show.msg}
 ## Any differences --- no for slopes, yes for ints by region & sex
 lm1 <- lm(logW~logL*region*sex,data=bio_LW)
 lw_aov1 <- Anova(lm1)
@@ -519,21 +429,154 @@ names(lw_allregs)[ncol(lw_allregs)] <- "predW"
 rownames(lw_allregs) <- NULL
 ```
 
-The slopes of the weight-length relationships did not differ between sexes (`r kPvalue(lw_aov1["logL:sex","Pr(>F)"],digits=3)`), among regions (`r kPvalue(lw_aov1["logL:region","Pr(>F)"],digits=3)`), or due to the interaction between sex and region (`r kPvalue(lw_aov1["logL:region:sex","Pr(>F)"],digits=3)`).  The intercepts, however, differed between the sexes (`r kPvalue(lw_aov1["sex","Pr(>F)"],digits=3)`) and among the regions (`r kPvalue(lw_aov1["region","Pr(>F)"],digits=3)`), but not due to the interaction of sex and region (`r kPvalue(lw_aov1["region:sex","Pr(>F)"],digits=3)`).  Post hoc contrasts found that the the intercept for females was greater than for males for fish from Eastern Michigan (`r kPvalue(lwcomp_res["male v. female, EastMich","adj.p"],digits=3)`), but there were no differences between sexes for any other region (p>`r kPvalue(min(lwcomp_res[1:4,"adj.p"]),digits=3,include.p=FALSE)`).  Post hoc contrasts showed that the intercepts did not significantly differ among regions for male Kiyi (`r kPvalue(min(lwcomp_res[16:25,"adj.p"]),digits=3,include.p=FALSE)`), but that the intercept for females from Eastern Michigan and Southern Ontario did not signficantly differ (`r kPvalue(lwcomp_res["female, SoOnt v. EastMich","adj.p"],digits=3)`), but were significantly greater than for females from all other regions (p<`r kPvalue(max(lwcomp_res[c(9,11:14),"adj.p"]),digits=3,include.p=FALSE)`) except for when Southern Ontario was compared to the Western Arm (`r kPvalue(lwcomp_res["female, West v. SoOnt","adj.p"],digits=3)`).  The intercepts for females from the Western Arm, Northern Michigan, and Northern Ontario did not significantly differ (p>`r kPvalue(min(lwcomp_res[c(6,7,10),"adj.p"]),digits=3,include.p=FALSE)`).
+The slopes of the weight-length relationships did not differ between sexes (`r kPvalue(lw_aov1["logL:sex","Pr(>F)"],digits=3)`), among regions (`r kPvalue(lw_aov1["logL:region","Pr(>F)"],digits=3)`), or due to the interaction between sex and region (`r kPvalue(lw_aov1["logL:region:sex","Pr(>F)"],digits=3)`).  The intercepts, however, differed between the sexes (`r kPvalue(lw_aov1["sex","Pr(>F)"],digits=3)`) and among the regions (`r kPvalue(lw_aov1["region","Pr(>F)"],digits=3)`), but not due to the interaction of sex and region (`r kPvalue(lw_aov1["region:sex","Pr(>F)"],digits=3)`).  Post hoc contrasts found that the intercept for females was greater than that for males for fish from Eastern Michigan (`r kPvalue(lwcomp_res["male v. female, EastMich","adj.p"],digits=3)`), but there were no differences between sexes for any other region (p > `r kPvalue(min(lwcomp_res[1:4,"adj.p"]),digits=3,include.p=FALSE)`).  Post hoc contrasts showed that the intercepts did not significantly differ among regions for male Kiyi (`r kPvalue(min(lwcomp_res[16:25,"adj.p"]),digits=3,include.p=FALSE)`), but that the intercept for females from Eastern Michigan and Southern Ontario did not signficantly differ (`r kPvalue(lwcomp_res["female, SoOnt v. EastMich","adj.p"],digits=3)`), but were significantly greater than for females from all other regions (p < `r kPvalue(max(lwcomp_res[c(9,11:14),"adj.p"]),digits=3,include.p=FALSE)`) except for when Southern Ontario was compared to the Western Arm (`r kPvalue(lwcomp_res["female, West v. SoOnt","adj.p"],digits=3)`).  The intercepts for females from the Western Arm, Northern Michigan, and Northern Ontario did not significantly differ (`r kPvalue(min(lwcomp_res[c(6,7,10),"adj.p"]),digits=3)`).
 
+```{r echo=FALSE, results=show.res, fig.show='hide', warning=FALSE, message=FALSE}
+lf <- read.csv("data/clean/lenfreq_all.csv") %>%
+  mutate(year=factor(year))
 
-# Results for tables
+dtype <- "lnorm"
+ctype <- mixconstr(consigma="CCV")
 
+## Trying to following 2003 year-class
+lf04 <- filterD(lf,year==2004) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf04_fit <- mix(lf04,mixparam(c(100,200),10),dist=dtype,constr=ctype)
+plot(lf04_fit,dist=dtype)
+lf04_sum <- summary(lf04_fit)
+ycl03_res <- data.frame(year=2004,age=1,
+                        mntl=lf04_sum$parameters$mu[1],
+                        sdtl=lf04_sum$parameters$sigma[1],
+                        setl=lf04_sum$se$mu.se[1])
 
-## Length and Age Characteristics
-```{r echo=FALSE}
-cat("1-Way ANOVA results for mean TL")
-res_tlaov
+lf05 <- filterD(lf,year==2005) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf05_fit <- mix(lf05,mixparam(c(100,200),10),dist=dtype,constr=ctype)
+plot(lf05_fit,dist=dtype)
+lf05_sum <- summary(lf05_fit)
+ycl03_res <- rbind(ycl03_res,c(2005,2,lf05_sum$parameters$mu[1],
+                               lf05_sum$parameters$sigma[1],lf05_sum$se$mu.se[1]))
 
+lf06 <- filterD(lf,year==2006) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf06_fit <- mix(lf06,mixparam(c(100,150,200),10),dist=dtype,constr=ctype)
+plot(lf06_fit,dist=dtype)
+lf06_sum <- summary(lf06_fit)
+ycl03_res <- rbind(ycl03_res,c(2006,3,lf06_sum$parameters$mu[2],
+                               lf06_sum$parameters$sigma[2],lf06_sum$se$mu.se[2]))
+
+lf07 <- filterD(lf,year==2007) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf07_fit <- mix(lf07,mixparam(c(120,160,200),10),dist=dtype,constr=ctype)
+plot(lf07_fit,dist=dtype)
+lf07_sum <- summary(lf07_fit)
+ycl03_res <- rbind(ycl03_res,c(2007,4,lf07_sum$parameters$mu[2],
+                               lf07_sum$parameters$sigma[2],lf07_sum$se$mu.se[2]))
+
+lf08 <- filterD(lf,year==2008) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf08_fit <- mix(lf08,mixparam(c(160,200),10),dist=dtype,constr=ctype)
+plot(lf08_fit,dist=dtype)
+lf08_sum <- summary(lf08_fit)
+ycl03_res <- rbind(ycl03_res,c(2008,5,lf08_sum$parameters$mu[1],
+                               lf08_sum$parameters$sigma[1],lf08_sum$se$mu.se[1]))
+
+ycl03_res
 ```
 
-## Weight-Length Relationships
-```{r echo=FALSE}
+```{r echo=FALSE, results=show.res, fig.show='hide', warning=FALSE, message=FALSE}
+## Trying to follow the 2009 year-class
+lf10 <- filterD(lf,year==2010) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf10_fit <- mix(lf10,mixparam(c(100,200),10),dist=dtype,constr=ctype)
+plot(lf10_fit,dist=dtype)
+lf10_sum <- summary(lf10_fit)
+ycl09_res <- data.frame(year=2010,age=1,
+                        mntl=lf10_sum$parameters$mu[1],
+                        sdtl=lf10_sum$parameters$sigma[1],
+                        setl=lf10_sum$se$mu.se[1])
+
+lf11 <- filterD(lf,year==2011) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf11_fit <- mix(lf11,mixparam(c(130,200),10),dist=dtype,constr=ctype)
+plot(lf11_fit,dist=dtype)
+lf11_sum <- summary(lf11_fit)
+ycl09_res <- rbind(ycl09_res,c(2011,2,lf11_sum$parameters$mu[1],
+                               lf11_sum$parameters$sigma[1],lf11_sum$se$mu.se[1]))
+
+lf12 <- filterD(lf,year==2012) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf12_fit <- mix(lf12,mixparam(c(150,200),10),dist=dtype,constr=ctype)
+plot(lf12_fit,dist=dtype)
+lf12_sum <- summary(lf12_fit)
+ycl09_res <- rbind(ycl09_res,c(2012,3,lf12_sum$parameters$mu[1],
+                               lf12_sum$parameters$sigma[1],lf12_sum$se$mu.se[1]))
+
+lf13 <- filterD(lf,year==2013) %>%
+  group_by(lcat5) %>% summarize(n=n()) %>% as.mixdata()
+lf13_fit <- mix(lf13,mixparam(c(160,220),c(10,20)),dist=dtype,constr=ctype)
+plot(lf13_fit,dist=dtype)
+lf13_sum <- summary(lf13_fit)
+ycl09_res <- rbind(ycl09_res,c(2013,4,lf13_sum$parameters$mu[1],
+                               lf13_sum$parameters$sigma[1],lf13_sum$se$mu.se[1]))
+
+ycl09_res
+```
+```{r echo=FALSE, results=show.res, message=show.msg}
+## Combine the length frequency analysis from following year-classes
+## for use later in plotting.
+ycl_follow <- cbind(yrclass=rep(c(2003,2009),c(5,4)),rbind(ycl03_res,ycl09_res)) %>%
+  mutate(LCI=mntl-1.96*setl,UCI=mntl+1.96*setl,
+         LCV=mntl-2*sdtl,UCV=mntl+2*sdtl)
+```
+
+```{r echo=FALSE, results=show.res, message=show.msg}
+lf14_ages_growth <- filterD(lf14_ages,otoAge %in% c(5,6,11))
+
+lm_growth5 <- lm(tl~region,data=filterD(lf14_ages_growth,otoAge==5))
+grow_aov5 <- Anova(lm_growth5)
+grow_mc5 <- summary(glht(lm_growth5,mcp(region="Tukey")))
+cld(grow_mc5)
+grow5_max.sigp <- max(grow_mc5$test$pvalues[grow_mc5$test$pvalues<0.05])
+grow5_min.nsigp <- min(grow_mc5$test$pvalues[grow_mc5$test$pvalues>0.05])
+
+lm_growth6 <- lm(tl~region,data=filterD(lf14_ages_growth,otoAge==6))
+grow_aov6 <- Anova(lm_growth6)
+grow_mc6 <- summary(glht(lm_growth6,mcp(region="Tukey")))
+cld(grow_mc6)
+grow6_max.sigp <- max(grow_mc6$test$pvalues[grow_mc6$test$pvalues<0.05])
+grow6_min.nsigp <- min(grow_mc6$test$pvalues[grow_mc6$test$pvalues>0.05])
+
+lm_growth11 <- lm(tl~region,data=filterD(lf14_ages_growth,otoAge==11))
+grow_aov11 <- Anova(lm_growth11)
+grow_mc11 <- summary(glht(lm_growth11,mcp(region="Tukey")))
+cld(grow_mc11)
+grow11_max.sigp <- max(grow_mc11$test$pvalues[grow_mc11$test$pvalues<0.05])
+grow11_min.nsigp <- min(grow_mc11$test$pvalues[grow_mc11$test$pvalues>0.05])
+```
+
+The mean lengths-at-ages 5, 6, and 11 differed signficantly among regions (Figure 7).  Fish from East Michigan were significantly longer (p < `r kPvalue(grow5_max.sigp,digits=3,include.p=FALSE)`) at age-5 than age-5 fish from other regions which did not differ significantly (p > `r kPvalue(grow5_min.nsigp,digits=3,include.p=FALSE)`).  Fish from North Ontario were significantly shorter than fish from South Ontario and East Michigan at age 6 (p < `r kPvalue(grow6_max.sigp,digits=3,include.p=FALSE)`) and 11 (p < `r kPvalue(grow11_max.sigp,digits=3,include.p=FALSE)`) with no other significant differences at these ages (p > `r kPvalue(min(c(grow6_min.nsigp,grow11_min.nsigp)),digits=3,include.p=FALSE)`).  Kiyi from the 2003 and 2009 year-classes exhbited similar growth trajectories during at least the first five years of life (Figure 7).
+
+
+```{r echo=FALSE, message=show.msg, results=show.res}
+cat("Results for Tables")
+cat("1-Way ANOVA results for mean TL")
+res_tlaov
+```
+
+```{r echo=FALSE, message=show.msg, results=show.res}
+cat("1-Way ANOVA results for mean Age")
+res_ageaov <- Summarize(otoAge~region,data=lf14_ages,digits=1)
+ageaov <- lm(otoAge~region,data=lf14_ages)
+agemc <- summary(glht(ageaov,mcp(region="Tukey")))
+res_ageaov <- cbind(res_ageaov,siglets=cld(agemc)$mcletters$Letters)
+ageperc <- prop.table(xtabs(~region+otoAge,data=lf14_ages),margin=1)*100
+res_ageaov <- cbind(res_ageaov,round(ageperc[,c("5","6","11")],0))
+names(res_ageaov)[13:15] <- paste0("%age-",names(res_ageaov)[13:15])
+res_ageaov
+```
+
+```{r echo=FALSE, message=show.msg, results=show.res}
 cat("Results from Individual Regressions")
 lw_allregs %>% mutate_each(funs(round(.,3)),-sex,-region,-n)
 
@@ -546,3 +589,114 @@ cat("Between Regions for MALES")
 lwcomp_res[16:25,] %>% mutate_each(funs(round(.,4)),-comp,-sig)
 ```
 
+
+```{r eval=makePlots, echo=FALSE, warning=FALSE, message=show.msg, results=show.res}
+cat("Figures Created")
+cat("Created Figure 2 - 2014 length frequency by region")
+png("results/figures/Figure2_LenFreq14Reg.PNG",width=6.5,height=6.5,
+    units="in",pointsize=24,family="sans",res=600)
+ggplot(lf14,aes(x=tl)) +
+  theme_mhist() +
+  scale_x_continuous(expand=c(0.02,0),limits=c(140,280),breaks=seq(0,275,25)) +
+  scale_y_continuous(expand=c(0,0),limits=c(0,1.2)) +
+  geom_histogram(aes(y=..ncount..),binwidth=5,fill="gray50",color="black") +
+  facet_wrap(~regionL,nrow=1,dir="v") +
+  labs(x="Total Length (mm)",y="Relative Frequency")
+tmp <- dev.off()
+```
+
+```{r eval=makePlots, echo=FALSE, warning=FALSE, message=show.msg, results=show.res}
+cat("Created Figure 3 - 2001-14 whole lake length frequency")
+
+tmp <- lf %>% group_by(year) %>% summarize(n=n())
+
+lf %<>% mutate(year2=factor(mapvalues(year,levels(year),
+                            paste0(tmp$year," (n=",tmp$n,")"))))
+
+tmp <- tmp[which(tmp$year %in% ycl_follow$year),]
+ycl_follow %<>% mutate(year2=factor(year),
+                       year2=factor(mapvalues(year2,levels(year2),
+                                    paste0(tmp$year," (n=",tmp$n,")"))))
+
+png("results/figures/Figure3_LFProgression.PNG",width=6.5,height=9,
+    units="in",pointsize=24,family="sans",res=600)
+lvls <- levels(lf$year2)
+ggplot(lf,aes(x=tl)) +
+  theme_mhist() +
+  scale_x_continuous(expand=c(0.02,0),limits=c(40,305),breaks=seq(0,350,50)) +
+  scale_y_continuous(expand=c(0,0),limits=c(0,1.2)) +
+  geom_histogram(aes(y=..ncount..),binwidth=5,fill="gray50",color="black") +
+  facet_wrap(~year2,nrow=2,dir="v") +
+  labs(x="Total Length (mm)",y="Relative Frequency") +
+  geom_text(aes(y=0.9),data=data.frame(tl=110,year2=factor(lvls[4],levels=lvls)),
+            label="11",size=5) +
+  geom_text(aes(y=0.4),data=data.frame(tl=95,year2=factor(lvls[6],levels=lvls)),
+            label="9",size=5) +
+  geom_text(aes(y=0.65),data=data.frame(tl=90,year2=factor(lvls[10],levels=lvls)),
+            label="5",size=5) +
+  geom_point(aes(y=1.1,x=mntl),data=ycl_follow) +
+  geom_segment(aes(y=1.1,yend=1.1,x=LCV,xend=UCV),data=ycl_follow)
+tmp <- dev.off()
+```
+
+```{r eval=makePlots, echo=FALSE, warning=FALSE, message=show.msg, results=show.res}
+cat("Created Figure 4 - Otolith age-bias plot")
+png("results/figures/Figure4_OtoOtoComp.PNG",width=4.5,height=4.5,units="in",pointsize=14,family="sans",res=600)
+par(mar=c(3,3,0.5,0.5),mgp=c(1.7,0.5,0),tcl=-0.2,las=1)
+plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="gray",yaxt="n",
+     lwd.agree=1,xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
+     show.pts=TRUE,transparency=1/15,ylab="Second Reader",xlab="First Reader")
+axis(2,seq(-3,2,1))
+tmp <- dev.off()
+```
+
+```{r eval=makePlots, echo=FALSE, warning=FALSE, message=show.msg, results=show.res}
+cat("Created Figure 5 - Scale-Otolith age-bias plot")
+png("results/figures/Figure5_ScaleOtoComp.PNG",width=4.5,height=4.5,
+    units="in",pointsize=14,family="sans",res=600)
+par(mar=c(3,3,0.5,0.5),mgp=c(1.7,0.5,0),tcl=-0.2,las=1)
+plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="gray",
+     lwd.agree=1,xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
+     show.pts=TRUE,transparency=1/5)
+axis(2,seq(-10,0,1))
+axis(1,seq(4,16,2))
+tmp <- dev.off()
+```
+
+```{r eval=makePlots, echo=FALSE, warning=FALSE, message=show.msg, results=show.res}
+cat("Created Figure 6 - Age frequencies by region")
+png("results/figures/Figure6_AgeFreq.PNG",width=6.5,height=6.5,
+    units="in",pointsize=24,family="sans",res=600)
+ggplot(data=lf14_ages,aes(x=otoAge)) +
+  theme_kiyi() +
+  scale_x_continuous(expand=c(0.02,0),limits=c(3.5,14.5),breaks=4:20) +
+  scale_y_continuous(expand=c(0.05,0)) +
+  geom_bar(color="black",fill="gray50") +
+  facet_wrap(~regionL,ncol=1,scales="free_y") +
+  labs(x="Consensus Otolith Age",y="Frequency")
+tmp <- dev.off()
+```
+
+```{r eval=makePlots, echo=FALSE, warning=FALSE, message=show.msg, results=show.res}
+cat("Created Figure 7 - Growth Trajectories")
+png("results/figures/Figure7_Growth.PNG",width=4.5,height=4.5,
+    units="in",pointsize=14,family="sans",res=600)
+par(mar=c(3,3,0.5,0.5),mgp=c(1.7,0.25,0),tcl=-0.2,las=1)
+growth <- lf14_ages_growth %>%
+  group_by(otoAge,region) %>%
+  summarize(n=n(),mntl=mean(tl),setl=se(tl)) %>%
+  mutate(lci=mntl-pt(0.975,df=n-1)*setl,uci=mntl+pt(0.975,df=n-1)*setl) %>%
+  mutate(jitage=otoAge+c(-0.3,-0.15,0,0.15,0.3))
+
+with(growth,
+     plotCI(jitage,mntl,ui=uci,li=lci,xlim=c(1,11.1),ylim=c(80,220),
+            sfrac=0,pch=20,cex=0.65,xlab="Age",ylab="Total Length (mm)"))
+with(filterD(ycl_follow,yrclass==2003),lines(age-0.075,mntl))
+with(filterD(ycl_follow,yrclass==2003),
+     plotCI(age-0.075,mntl,ui=UCI,li=LCI,sfrac=0,cex=0.1,pch=1,add=TRUE))
+with(filterD(ycl_follow,yrclass==2009),lines(age+0.075,mntl,lty=2))
+with(filterD(ycl_follow,yrclass==2009),
+     plotCI(age+0.075,mntl,ui=UCI,li=LCI,sfrac=0,cex=0.1,pch=1,add=TRUE))
+axis(1,seq(1,11,2))
+tmp <- dev.off()
+```

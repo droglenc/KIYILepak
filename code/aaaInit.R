@@ -22,12 +22,14 @@ library(lubridate) # to handle dates
 library(ggplot2)
 library(nnet)      # multinom
 library(Matching)  # ks.boot
-library(magrittr)  # for %<>%
-library(dplyr)     # manipulating data
 library(multcomp)  # multiple comparisons
 library(car)       # leveneTest
 library(NCStats)   # rSquared
 library(contrast)  # contrast
+library(mixdist)   # mix
+library(plotrix)   # plotCI
+library(magrittr)  # for %<>%
+library(dplyr)     # manipulating data
 
 ##############################################################
 ##  2. Set up colors and names for the regions              ##
