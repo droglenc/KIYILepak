@@ -4,13 +4,13 @@ author: "Taylor A. Lepak, Derek H. Ogle, Mark R. Vinson"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: word_document
 ---
-```{r echo=FALSE, results='hide', message=FALSE}
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
 ## Read helper code
 source("code/aaaInit.R")
 ## Set random seed ... bootstraps and ALKs will be the same each time
 set.seed(34783475)
 ## Show intermediate results or not
-show.res <- TRUE
+show.res <- 'hide'  # 'asis' or 'hide'
 ```
 
 # Methods
@@ -88,9 +88,7 @@ lf14_smc <- summary(lf14_mc)
 lf14_smc_max.sig.p <- max(lf14_smc$test$pvalues[which(lf14_smc$test$pvalues<0.05)])
 lf14_siglets <- cld(lf14_mc)$mcletters$Letters
 
-cat("1-Way ANOVA results for mean TL (part of TABLE 1)")
-res <-cbind(Summarize(tl~region,data=lf14,digits=1),siglets=lf14_siglets[regS])
-res
+res_tlaov <- cbind(Summarize(tl~region,data=lf14,digits=1),siglets=lf14_siglets[regS])
 
 ## Kruskal-Wallis for tl -- NOT IN MANUSCRIPT
 lf14_kwt <- kruskal.test(tl~region,data=lf14)
@@ -109,7 +107,7 @@ sex_freq2 <- xtabs(~sex,data=filterD(bio,sex!="juvenile"))
 sex_perc2 <- prop.table(sex_freq2)*100
 ```
 
-```{r echo=FALSE, results='hide', fig.show='hide'}
+```{r echo=FALSE, results='hide', fig.show='hide', warning=FALSE}
 ## Produces FIGURE 2
 png("results/figures/Figure2_LenFreq14Reg.PNG",width=6.5,height=6.5,
     units="in",pointsize=24,family="sans",res=600)
@@ -125,7 +123,7 @@ dev.off()
 
 A total of `r formatC(lf14_sum[["n"]],format="f",digits=0)` Kiyi were sampled in 2014.  These fish were between `r formatC(lf14_sum[["min"]],format="f",digits=0)` and `r formatC(lf14_sum[["max"]],format="f",digits=0)` mm TL with a mean (SD) TL of `r formatC(lf14_sum[["mean"]],format="f",digits=0)` (`r formatC(lf14_sum[["sd"]],format="f",digits=1)`) mm.  The length distribution of Kiyi from the Northern Ontario region differed significantly from the length distributions of Kiyi captured from all other regions (p<`r formatC(ks_max.sig.p,format="f",digits=3)`), which did not differ (p>`r formatC(ks_min.nsig.p,format="f",digits=3)`).  The Northern Ontario region had fewer longer fish, which resulted in a significantly shorter mean TL (p<`r formatC(lf14_smc_max.sig.p,format="f",digits=3)`; Figure 2).  In the subsample of `r sum(sex_freq)` fish, `r kCounts(sex_freq["juvenile"])` were juveniles and `r formatC(sex_perc2["female"],format="f",digits=1)`% of non-juvenile fish were female.
 
-```{r eval=FALSE, echo=FALSE, results='hide', fig.show='hide'}
+```{r eval=FALSE, echo=FALSE, results='hide', fig.show='hide', warning=FALSE}
 ## Produces FIGURE 3
 lf <- read.csv("data/clean/lenfreq_all.csv") %>%
   mutate(year=factor(year))
@@ -288,9 +286,9 @@ lf14_ages <- lf14 %>%
   as.data.frame()
 ```
 
-Kiyi for which a consensus otolith age estimate was obtained were used to generate ALKs.  Four Kiyi less than 140 mm TL (all of the juvenile fish) were excluded from all ALK analyses because of sample size considerations.  An additional `r kCounts(bio_alk_numremoved)` fish that were estimated to be age-13 or older were also removed from the analysis that compared ALKs among regions because of sample size considerations.  Age-length keys did not differ significantly between sexes within any region (p>`r formatC(min(alkcomp_res$pvalue[1:5]),format="f",digits=3)`) or among regions when sexes were pooled (p=`r formatC(alkcomp_res$pvaluep[7],format="f",digits=3)`).  Despite this finding, to minimize the loss of any regional differences in the relationship between age and length, region-specific observed age-length keys were generated and used to assign ages by region to the `r formatC(nrow(lf14_ages),format="f",digits=3)` sampled Kiyi that were longer than 140 mm.
+Kiyi for which a consensus otolith age estimate was obtained were used to generate ALKs.  Four Kiyi less than 140 mm TL (all of the juvenile fish) were excluded from all ALK analyses because of sample size considerations.  An additional `r kCounts(bio_alk_numremoved)` fish that were estimated to be age-13 or older were also removed from the analysis that compared ALKs among regions because of sample size considerations.  Age-length keys did not differ significantly between sexes within any region (p>`r formatC(min(alkcomp_res$pvalue[1:5]),format="f",digits=3)`) or among regions when sexes were pooled (p=`r formatC(alkcomp_res$pvalue[7],format="f",digits=3)`).  Despite this finding, to minimize the loss of any regional differences in the relationship between age and length, region-specific observed age-length keys were generated and used to assign ages by region to the `r nrow(lf14_ages)` sampled Kiyi that were longer than 140 mm.
 
-```{r echo=FALSE, results=show.res, message=show.res}
+```{r echo=FALSE, results=show.res, message=show.res, warning=FALSE}
 ## Create region-specific data
 West  <- filterD(bio_ALK,region=="West")
 NoMich  <- filterD(bio_ALK,region=="NoMich")
@@ -334,7 +332,7 @@ lf14_ages <- rbind(West.unaged.mod,NoMich.unaged.mod,NoOnt.unaged.mod,
                    SoOnt.unaged.mod,EastMich.unaged.mod)
 any(is.na(lf14_ages$otoAge))     # confirm FALSE
 ```
-```{r echo=FALSE, results=show.res, messages=show.res}
+```{r echo=FALSE, results=show.res, messages=show.res, warning=FALSE}
 # Age frequency tables by region (sexes pooled)
 #   with corresponding chi-square tests
 ( age_freq1 <- xtabs(~region+otoAge,data=lf14_ages) )
@@ -344,7 +342,7 @@ colnames(age_freq2)[c(1,ncol(age_freq2))] <- c("<6",">11")
 # Made ages <6,6,7,8,9,10,11,>11 in groups
 ( OA.chi <- chisq.test(age_freq2) )
 ```
-```{r echo=FALSE, results=show.res, messages=show.res}
+```{r echo=FALSE, results=show.res, messages=show.res, warning=FALSE}
 png("results/figures/Figure6_AgeFreq.PNG",width=6.5,height=6.5,
     units="in",pointsize=24,family="sans",res=600)
 ggplot(data=lf14_ages,aes(x=otoAge)) +
@@ -358,4 +356,193 @@ dev.off()
 ```
 
 The age distribution was bimodal in each region (Figure 6) with an upper mode centered at age-11 in all five regions and a lower mode that consisted of nearly equal numbers of age-5 and age-6 fish in all regions except for Eastern Michigan where there were nearly twice as many age-5 as age-6 fish.  The age distribution, after age-4 and 5 fish were pooled and age-11 and older fish were pooled within each region for sample size reasons, differed significantly among regions (p<0.001).  Variability around the age-11 mode and the relative frequency of intermediate aged (ages 7-9) fish appeared to explain much of the difference in age distribution among regions.
+
+```{r echo=FALSE, results=show.res, message=show.res}
+bio_LW <- filterD(bio,sex!="juvenile",!is.na(wt),!is.na(tl))
+
+## Separate regressions
+lm1WAf <- lm(logW~logL,data=filterD(bio_LW,region=="West",sex=="female"))
+lm1NMf <- lm(logW~logL,data=filterD(bio_LW,region=="NoMich",sex=="female"))
+lm1NOf <- lm(logW~logL,data=filterD(bio_LW,region=="NoOnt",sex=="female"))
+lm1SOf <- lm(logW~logL,data=filterD(bio_LW,region=="SoOnt",sex=="female"))
+lm1EMf <- lm(logW~logL,data=filterD(bio_LW,region=="EastMich",sex=="female"))
+lm1WAm <- lm(logW~logL,data=filterD(bio_LW,region=="West",sex=="male"))
+lm1NMm <- lm(logW~logL,data=filterD(bio_LW,region=="NoMich",sex=="male"))
+lm1NOm <- lm(logW~logL,data=filterD(bio_LW,region=="NoOnt",sex=="male"))
+lm1SOm <- lm(logW~logL,data=filterD(bio_LW,region=="SoOnt",sex=="male"))
+lm1EMm <- lm(logW~logL,data=filterD(bio_LW,region=="EastMich",sex=="male"))
+
+lw_allregs <- data.frame(
+           sex=gl(2,5,labels=c("female","male")),region=rep(regL,2),
+           n=c(lm1WAf$df.residual+2,lm1NMf$df.residual+2,lm1NOf$df.residual+2,
+               lm1SOf$df.residual+2,lm1EMf$df.residual+2,
+               lm1WAm$df.residual+2,lm1NMm$df.residual+2,lm1NOm$df.residual+2,
+               lm1SOm$df.residual+2,lm1EMm$df.residual+2),
+           r2=c(rSquared(lm1WAf),rSquared(lm1NMf),rSquared(lm1NOf),
+                rSquared(lm1SOf),rSquared(lm1EMf),
+                rSquared(lm1WAm),rSquared(lm1NMm),rSquared(lm1NOm),
+                rSquared(lm1SOm),rSquared(lm1EMm)),
+           rbind(lm1WAf$coefficients,lm1NMf$coefficients,lm1NOf$coefficients,
+                 lm1SOf$coefficients,lm1EMf$coefficients,
+                 lm1WAm$coefficients,lm1NMm$coefficients,lm1NOm$coefficients,
+                 lm1SOm$coefficients,lm1EMm$coefficients))
+# reverse order of intercept and slope
+lw_allregs <- lw_allregs[,c(1:4,6,5)]
+names(lw_allregs)[5:6] <- c("b","log(a)")
+```
+
+```{r echo=FALSE, results=show.res, message=show.res}
+## Any differences --- no for slopes, yes for ints by region & sex
+lm1 <- lm(logW~logL*region*sex,data=bio_LW)
+lw_aov1 <- Anova(lm1)
+
+## Double-Check ... any differences in slopes ... NO
+bio_LW %<>% mutate(sexreg=interaction(region,sex))
+lm2 <- lm(logW~logL*sexreg,data=bio_LW)
+Anova(lm2)
+
+## Get intercepts by region and sex assuming a constant slope
+lm2a <- lm(logW~0+logL+sexreg,data=bio_LW)
+# get common slope
+lw_commonb <- coef(lm2a)[["logL"]]
+## Create logW values that are adjusted for a common slope
+## to a value at the meadian total length.
+( mdn_tl <- median(bio_LW$tl) )
+# add adjusted values to data.frame
+bio_LW %<>% mutate(adj.logW=predict(lm2a,data.frame(logL=log10(mdn_tl),
+                                                   sexreg=sexreg))+residuals(lm2a))
+# fit two-way ANOVA with adjusted values
+lm3 <- lm(adj.logW~sex*region,data=bio_LW)
+# do individual contrasts ... sex within regions
+lw_sexWA <- contrast(lm3,list(sex="male",region="West"),
+                         list(sex="female",region="West"))
+lw_sexNM <- contrast(lm3,list(sex="male",region="NoMich"),
+                         list(sex="female",region="NoMich"))
+lw_sexNO <- contrast(lm3,list(sex="male",region="NoOnt"),
+                         list(sex="female",region="NoOnt"))
+lw_sexSO <- contrast(lm3,list(sex="male",region="SoOnt"),
+                         list(sex="female",region="SoOnt"))
+lw_sexEM <- contrast(lm3,list(sex="male",region="EastMich"),
+                         list(sex="female",region="EastMich"))
+lwcomp_res_sex <- data.frame(comp=paste0("male v. female, ",regS),
+                             rbind(unlist(lw_sexWA[c("Contrast","Pvalue")]),
+                                   unlist(lw_sexNM[c("Contrast","Pvalue")]),
+                                   unlist(lw_sexNO[c("Contrast","Pvalue")]),
+                                   unlist(lw_sexSO[c("Contrast","Pvalue")]),
+                                   unlist(lw_sexEM[c("Contrast","Pvalue")])))
+rownames(lwcomp_res_sex) <- paste0("male v. female, ",regS)
+                             
+
+# do individual contrasts ... regions with females
+lw_femWANM <- contrast(lm3,list(sex="female",region="West"),
+                           list(sex="female",region="NoMich"))
+lw_femWANO <- contrast(lm3,list(sex="female",region="West"),
+                           list(sex="female",region="NoOnt"))
+lw_femWASO <- contrast(lm3,list(sex="female",region="West"),
+                           list(sex="female",region="SoOnt"))
+lw_femWAEM <- contrast(lm3,list(sex="female",region="West"),
+                           list(sex="female",region="EastMich"))
+lw_femNMNO <- contrast(lm3,list(sex="female",region="NoMich"),
+                           list(sex="female",region="NoOnt"))
+lw_femNMSO <- contrast(lm3,list(sex="female",region="NoMich"),
+                           list(sex="female",region="SoOnt"))
+lw_femNMEM <- contrast(lm3,list(sex="female",region="NoMich"),
+                           list(sex="female",region="EastMich"))
+lw_femNOSO <- contrast(lm3,list(sex="female",region="NoOnt"),
+                           list(sex="female",region="SoOnt"))
+lw_femNOEM <- contrast(lm3,list(sex="female",region="NoOnt"),
+                           list(sex="female",region="EastMich"))
+lw_femSOEM <- contrast(lm3,list(sex="female",region="SoOnt"),
+                           list(sex="female",region="EastMich"))
+lwcomp_res_fem <- data.frame(comp=paste0("female, ",apply(combn(regS,2),MARGIN=2,FUN=paste0,collapse=" v. ")),
+                             rbind(unlist(lw_femWANM[c("Contrast","Pvalue")]),
+                                   unlist(lw_femWANO[c("Contrast","Pvalue")]),
+                                   unlist(lw_femWASO[c("Contrast","Pvalue")]),
+                                   unlist(lw_femWAEM[c("Contrast","Pvalue")]),
+                                   unlist(lw_femNMNO[c("Contrast","Pvalue")]),
+                                   unlist(lw_femNMSO[c("Contrast","Pvalue")]),
+                                   unlist(lw_femNMEM[c("Contrast","Pvalue")]),
+                                   unlist(lw_femNOSO[c("Contrast","Pvalue")]),
+                                   unlist(lw_femNOEM[c("Contrast","Pvalue")]),
+                                   unlist(lw_femSOEM[c("Contrast","Pvalue")])))
+rownames(lwcomp_res_fem) <- paste0("female, ",apply(combn(regS,2),MARGIN=2,FUN=paste0,collapse=" v. "))
+                             
+
+# do individual contrasts ... regions with males
+lw_malWANM <- contrast(lm3,list(sex="male",region="West"),
+                           list(sex="male",region="NoMich"))
+lw_malWANO <- contrast(lm3,list(sex="male",region="West"),
+                           list(sex="male",region="NoOnt"))
+lw_malWASO <- contrast(lm3,list(sex="male",region="West"),
+                           list(sex="male",region="SoOnt"))
+lw_malWAEM <- contrast(lm3,list(sex="male",region="West"),
+                           list(sex="male",region="EastMich"))
+lw_malNMNO <- contrast(lm3,list(sex="male",region="NoMich"),
+                           list(sex="male",region="NoOnt"))
+lw_malNMSO <- contrast(lm3,list(sex="male",region="NoMich"),
+                           list(sex="male",region="SoOnt"))
+lw_malNMEM <- contrast(lm3,list(sex="male",region="NoMich"),
+                           list(sex="male",region="EastMich"))
+lw_malNOSO <- contrast(lm3,list(sex="male",region="NoOnt"),
+                           list(sex="male",region="SoOnt"))
+lw_malNOEM <- contrast(lm3,list(sex="male",region="NoOnt"),
+                           list(sex="male",region="EastMich"))
+lw_malSOEM <- contrast(lm3,list(sex="male",region="SoOnt"),
+                           list(sex="male",region="EastMich"))
+lwcomp_res_mal <- data.frame(comp=paste0("male, ",apply(combn(regS,2),MARGIN=2,FUN=paste0,collapse=" v. ")),
+                             rbind(unlist(lw_malWANM[c("Contrast","Pvalue")]),
+                                   unlist(lw_malWANO[c("Contrast","Pvalue")]),
+                                   unlist(lw_malWASO[c("Contrast","Pvalue")]),
+                                   unlist(lw_malWAEM[c("Contrast","Pvalue")]),
+                                   unlist(lw_malNMNO[c("Contrast","Pvalue")]),
+                                   unlist(lw_malNMSO[c("Contrast","Pvalue")]),
+                                   unlist(lw_malNMEM[c("Contrast","Pvalue")]),
+                                   unlist(lw_malNOSO[c("Contrast","Pvalue")]),
+                                   unlist(lw_malNOEM[c("Contrast","Pvalue")]),
+                                   unlist(lw_malSOEM[c("Contrast","Pvalue")])))
+rownames(lwcomp_res_mal) <- paste0("male, ",apply(combn(regS,2),MARGIN=2,FUN=paste0,collapse=" v. "))
+
+lwcomp_res <- rbind(lwcomp_res_sex,lwcomp_res_fem,lwcomp_res_mal)
+lwcomp_res <- cbind(lwcomp_res,adj.p=p.adjust(lwcomp_res[,"Pvalue.1"]))
+lwcomp_res <- data.frame(lwcomp_res,sig=lwcomp_res[,"adj.p"]<0.05)
+
+## Add the intercepts from the model with a common slope
+lw_allregs <- cbind(lw_allregs,coef(lm2a)[-1])
+names(lw_allregs)[ncol(lw_allregs)] <- "adj.log(a)"
+
+## Add the predicted weight at the median tl
+lw_allregs <- cbind(lw_allregs,
+                    10^predict(lm2a,data.frame(logL=log10(mdn_tl),
+                                               sexreg=levels(bio_LW$sexreg))))
+names(lw_allregs)[ncol(lw_allregs)] <- "predW"
+## Clean up and print results
+rownames(lw_allregs) <- NULL
+```
+
+The slopes of the weight-length relationships did not differ between sexes (`r kPvalue(lw_aov1["logL:sex","Pr(>F)"],digits=3)`), among regions (`r kPvalue(lw_aov1["logL:region","Pr(>F)"],digits=3)`), or due to the interaction between sex and region (`r kPvalue(lw_aov1["logL:region:sex","Pr(>F)"],digits=3)`).  The intercepts, however, differed between the sexes (`r kPvalue(lw_aov1["sex","Pr(>F)"],digits=3)`) and among the regions (`r kPvalue(lw_aov1["region","Pr(>F)"],digits=3)`), but not due to the interaction of sex and region (`r kPvalue(lw_aov1["region:sex","Pr(>F)"],digits=3)`).  Post hoc contrasts found that the the intercept for females was greater than for males for fish from Eastern Michigan (`r kPvalue(lwcomp_res["male v. female, EastMich","adj.p"],digits=3)`), but there were no differences between sexes for any other region (p>`r kPvalue(min(lwcomp_res[1:4,"adj.p"]),digits=3,include.p=FALSE)`).  Post hoc contrasts showed that the intercepts did not significantly differ among regions for male Kiyi (`r kPvalue(min(lwcomp_res[16:25,"adj.p"]),digits=3,include.p=FALSE)`), but that the intercept for females from Eastern Michigan and Southern Ontario did not signficantly differ (`r kPvalue(lwcomp_res["female, SoOnt v. EastMich","adj.p"],digits=3)`), but were significantly greater than for females from all other regions (p<`r kPvalue(max(lwcomp_res[c(9,11:14),"adj.p"]),digits=3,include.p=FALSE)`) except for when Southern Ontario was compared to the Western Arm (`r kPvalue(lwcomp_res["female, West v. SoOnt","adj.p"],digits=3)`).  The intercepts for females from the Western Arm, Northern Michigan, and Northern Ontario did not significantly differ (p>`r kPvalue(min(lwcomp_res[c(6,7,10),"adj.p"]),digits=3,include.p=FALSE)`).
+
+
+# Results for tables
+
+
+## Length and Age Characteristics
+```{r echo=FALSE}
+cat("1-Way ANOVA results for mean TL")
+res_tlaov
+
+```
+
+## Weight-Length Relationships
+```{r echo=FALSE}
+cat("Results from Individual Regressions")
+lw_allregs %>% mutate_each(funs(round(.,3)),-sex,-region,-n)
+
+cat("Results from Multiple Comparisons of Intercepts")
+cat("Between Sexes, Within Each Region")
+lwcomp_res[1:5,] %>% mutate_each(funs(round(.,4)),-comp,-sig)
+cat("Between Regions for FEMALES")
+lwcomp_res[6:15,] %>% mutate_each(funs(round(.,4)),-comp,-sig)
+cat("Between Regions for MALES")
+lwcomp_res[16:25,] %>% mutate_each(funs(round(.,4)),-comp,-sig)
+```
 
