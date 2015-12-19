@@ -15,16 +15,22 @@ makePlots <- TRUE
 ```
 
 ```{r echo=FALSE, results='hide'}
+## Load and manipulate the length-frequency data from 2014.
 lf14 <- read.csv("data/clean/lenfreq_2014.csv") %>%
   mutate(region=factor(region,levels=regS),
          regionL=factor(regionL,levels=regL),
-         year=factor(year))
+         year=factor(year),
+         mon=factor(mon,levels=c("May","Jun","Jul")))
 # basic length summary of the entire sample
 lf14_sum <- Summarize(~tl,data=lf14)
+# months when Kiyi were collected
+lf14_mons <- xtabs(~mon,data=lf14)
+# locations where Kiyi were collected
+lf14_locs <- xtabs(~location,data=lf14)
 ```
 
 ```{r echo=FALSE, results=show.res, fig.show='hide', message=show.msg}
-##  Examine Length Frequency by Region
+##  Examine Length Frequency by Region (for 2014)
 # Split by region for comparisons below
 lf14_west  <- filterD(lf14,region=="West") %>% as.data.frame()
 lf14_nomich  <- filterD(lf14,region=="NoMich") %>% as.data.frame()
@@ -60,7 +66,7 @@ ggplot(lf14,aes(tl,color=region)) +
   scale_color_manual(values=clrs)
 ```
 ```{r echo=FALSE, results=show.res, message=show.msg}
-## ANOVA for tl
+## ANOVA for tl (for 2014)
 lf14_levtest <- leveneTest(tl~region,data=lf14)
 lf14_aov.lm <- lm(tl~region,data=lf14)
 lf14_aov <- anova(lf14_aov.lm)
@@ -77,6 +83,7 @@ lf14_kwt.mc <- dunnTest(tl~region,data=lf14)
 ```
 
 ```{r echo=FALSE, results='hide'}
+## Load the Biological Data (for 2014)
 bio <- read.csv("data/clean/bio.csv") %>%
   mutate(region=factor(region,levels=regS),
          regionL=factor(regionL,levels=regL),
@@ -86,11 +93,17 @@ bio <- read.csv("data/clean/bio.csv") %>%
 sex_freq <- xtabs(~sex,data=bio)
 sex_freq2 <- xtabs(~sex,data=filterD(bio,sex!="juvenile"))
 sex_perc2 <- prop.table(sex_freq2)*100
+
+# maturity summary of the non-juvenile subsample
+mat_freq <- xtabs(~sex+mat,data=filterD(bio,sex!="juvenile"))
+mat_sum <- Summarize(tl~sex,data=filterD(bio,sex!="juvenile",mat=="mature"))
 ```
 
-A total of `r formatC(lf14_sum[["n"]],format="f",digits=0)` Kiyi were sampled in 2014.  These fish were between `r formatC(lf14_sum[["min"]],format="f",digits=0)` and `r formatC(lf14_sum[["max"]],format="f",digits=0)` mm TL with a mean (SD) TL of `r formatC(lf14_sum[["mean"]],format="f",digits=0)` (`r formatC(lf14_sum[["sd"]],format="f",digits=1)`) mm.  The length distribution of Kiyi from the Northern Ontario region differed significantly from the length distributions of Kiyi captured from all other regions (p < `r kPvalue(ks_max.sig.p,digits=3,include.p=FALSE)`), which did not differ (p > `r kPvalue(ks_min.nsig.p,digits=3,include.p=FALSE)`).  The Northern Ontario region had fewer longer fish, which resulted in a significantly shorter mean TL (p < `r kPvalue(lf14_smc_max.sig.p,digits=3,include.p=FALSE)`; Figure 2).  In the subsample of `r sum(sex_freq)` fish, `r kCounts(sex_freq["juvenile"])` were juveniles and `r formatC(sex_perc2["female"],format="f",digits=1)`% of non-juvenile fish were female.
+A total of `r formatC(lf14_sum[["n"]],format="f",digits=0)` Kiyi were collected at `r length(lf14_locs)` of the 102 locations sampled in 2014 (Figure 1).  Kiyi were found at one station on 27 May 2014, at two stations on 5 June 2014, and at 21 stations between 7 July and 20 July 2014.  Biomass and density ranged from 0-12 $kg \cdot ha^{-1}$ and 0-253 $fish \cdot ha^{-1}$, respectively.  Based on collections made at 22 on-contour sampling locations, the minimum and maximum depth of capture were 132 and 256 m.  Maximum density (253 $fish \cdot ha^{-1}$) and biomass (12  $kg \cdot ha^{-1}$) were observed at 190 m.  Bottom water temperatures at sites where Kiyi were collected ranged from 2.8-$3.9^{o}$C with a mean of $3.5^{o}$C.
 
-The examination of length frequencies from 2001 through 2014 revealed distinct modes near 80-100 mm in 2004, 2006, and 2010 (Figure 3).  These modes corresponded to age-1 fish as Kiyi likely hatch at a size (10-12 mm) and time (early spring) similar to cisco (Oyadomari and Auer, 2007; Oyadomari and Auer, 2008).  Thus, these cohorts corresponded to ages 11, 9, and 5, respectively, in 2014.  There was little evidence for the 2005 cohort in 2007 which suggests few age-9 fish may exist in 2014.
+The lengths of collected Kiyi were between `r formatC(lf14_sum[["min"]],format="f",digits=0)` and `r formatC(lf14_sum[["max"]],format="f",digits=0)` mm TL with a mean (SD) TL of `r formatC(lf14_sum[["mean"]],format="f",digits=0)` (`r formatC(lf14_sum[["sd"]],format="f",digits=1)`) mm.  The length distribution of Kiyi from the Northern Ontario region differed significantly from the length distributions of Kiyi captured from all other regions (p < `r kPvalue(ks_max.sig.p,digits=3,include.p=FALSE)`), which did not differ (p > `r kPvalue(ks_min.nsig.p,digits=3,include.p=FALSE)`).  The Northern Ontario region had fewer longer fish, which resulted in a significantly shorter mean TL (p < `r kPvalue(lf14_smc_max.sig.p,digits=3,include.p=FALSE)`; Figure 2).  In the (sex- and length-stratified) subsample of `r sum(sex_freq)` fish, `r kCounts(sex_freq["juvenile"])` were juveniles and `r formatC(sex_perc2["female"],format="f",digits=1)`% of non-juvenile fish were female.  Only `r mat_freq["female","immature"]` female and `r mat_freq["male","immature"]` males in the subsample were sexually immature.  The smallest sexually mature fish in the subsample were a `r formatC(mat_sum[1,"min"],format="f",digits=0)` mm female and a `r formatC(mat_sum[2,"min"],format="f",digits=0)` mm male.
+
+The examination of length frequencies from 2001 through 2014 revealed distinct modes near 80-100 mm in 2004, 2006, and 2010 (Figure 3).  These modes corresponded to age-1 fish as Kiyi likely hatch at a size (10-12 mm) and time (early spring) similar to Cisco (Oyadomari and Auer, 2007; Oyadomari and Auer, 2008) and reached a mean length of approximately 100 mm by the following spring in Lake Michigan (Tables 8 and 9 in Deason and Hile 1947).  Thus, these cohorts corresponded to ages 11, 9, and 5, respectively, in 2014.  There was little evidence for the 2005 cohort in 2007 which suggests that few age-9 fish may exist in 2014.
 
 ```{r echo=FALSE, results='hide'}
 # summary of the otolith characteristics
@@ -124,7 +137,7 @@ ab_OS_bsum <- summary(ab_OS,what="bias")
 ab_OS_bsym <- summary(ab_OS,what="symmetry")
 ```
 
-Ages were estimated by two readers from `r sum(octbl2)` thin-sectioned otoliths.  Of these otoliths, `r octbl2["UNREADABLE"]` (`r formatC(octbl2_perc["UNREADABLE"],format="f",digits=1)`%) were deemed unreadable (cracked or cloudy image) and were removed from further consideration.  Ages estimated from the two readers perfectly agreed for `r formatC(ap_OO_pdiff1[["0"]],format="f",digits=1)`% of the otoliths, agreed within one year for `r formatC(100-ap_OO_pdiff1[["2+"]],format="f",digits=1)`% of the otoliths, had a between-reader ACV of `r formatC(ap_OO_psum[["ACV"]],format="f",digits=1)`, and showed no significant systematic bias (`r kPvalue(ab_OO_bsym[2,"p"],digits=3)`; Figure 4).  However, the mean estimated age for the second reader was slightly greater when the first reader estimated an age of 5 (95% CI: `r formatC(ab_OO_bsum[2,"LCI"],format="f",digits=1)`-`r formatC(ab_OO_bsum[2,"UCI"],format="f",digits=1)`; `r kPvalue(ab_OO_bsum[2,"adj.p"],digits=3)`) and slightly lower when the first reader estimated an age of 12 (95% CI: `r formatC(ab_OO_bsum[9,"LCI"],format="f",digits=1)`-`r formatC(ab_OO_bsum[9,"UCI"],format="f",digits=1)`; `r kPvalue(ab_OO_bsum[9,"adj.p"],digits=3)`).  Mean scale age for each otolith age was less than the otolith age for all observed otolith ages with adequate sample sizes (p < `r kPvalue(max(ab_OS_bsum[,"adj.p"],na.rm=TRUE),digits=3,include.p=FALSE)`; Figure 5).
+Ages were estimated by two readers from `r sum(octbl2)` thin-sectioned otoliths.  Of these otoliths, `r octbl2["UNREADABLE"]` (`r formatC(octbl2_perc["UNREADABLE"],format="f",digits=1)`%) were deemed unreadable (cracked or cloudy image) and were removed from further consideration.  Ages estimated from the two readers perfectly agreed for `r formatC(ap_OO_pdiff1[["0"]],format="f",digits=1)`% of the otoliths, agreed within one year for `r formatC(100-ap_OO_pdiff1[["2+"]],format="f",digits=1)`% of the otoliths, had a between-reader ACV of `r formatC(ap_OO_psum[["ACV"]],format="f",digits=1)`, and showed no significant systematic bias (`r kPvalue(ab_OO_bsym[2,"p"],digits=3)`; Figure 4).  However, the mean estimated age for the second reader was slightly greater when the first reader estimated an age of 5 (95% CI: `r formatC(ab_OO_bsum[2,"LCI"],format="f",digits=1)`-`r formatC(ab_OO_bsum[2,"UCI"],format="f",digits=1)`; `r kPvalue(ab_OO_bsum[2,"adj.p"],digits=3)`) and slightly lower when the first reader estimated an age of 12 (95% CI: `r formatC(ab_OO_bsum[9,"LCI"],format="f",digits=1)`-`r formatC(ab_OO_bsum[9,"UCI"],format="f",digits=1)`; `r kPvalue(ab_OO_bsum[9,"adj.p"],digits=3)`).  Mean scale age for each otolith age was less than the otolith age for all observed otolith ages with adequate sample sizes (p < `r kPvalue(max(ab_OS_bsum[,"adj.p"],na.rm=TRUE),digits=3,include.p=FALSE)`; Figure 5).  The maximum observed age was `r max(bio$otoAge,na.rm=TRUE)` when otoliths were used, but only `r max(bio$scaleAge,na.rm=TRUE)` when scales were used.
 
 ```{r echo=FALSE, results=show.res, message=show.msg}
 # Remove juvenile fish (same as removing all fish <140 mm)
@@ -264,8 +277,7 @@ colnames(age_freq2)[c(1,ncol(age_freq2))] <- c("<6",">11")
 ( OA.chi <- chisq.test(age_freq2) )
 ```
 
-
-The age distribution was bimodal in each region (Figure 6) with an upper mode centered at age-11 in all five regions and a lower mode that consisted of nearly equal numbers of age-5 and age-6 fish in all regions except for Eastern Michigan where there were nearly twice as many age-5 as age-6 fish.  The age distribution, after age-4 and 5 fish were pooled and age-11 and older fish were pooled within each region for sample size reasons, differed significantly among regions (`r kPvalue(OA.chi$p.value,digits=3)`).  Variability around the age-11 mode and the relative frequency of intermediate aged (ages 7-9) fish appeared to explain much of the difference in age distribution among regions.
+The age distribution (Figure 6; Table 1) was bimodal in each region with an upper mode centered at age-11 in all five regions and a lower mode that consisted of nearly equal numbers of age-5 and age-6 fish in all regions except for Eastern Michigan where there were nearly twice as many age-5 as age-6 fish.  The age distribution, after age-4 and 5 fish were pooled and age-11 and older fish were pooled within each region for sample size reasons, differed significantly among regions (`r kPvalue(OA.chi$p.value,digits=3)`).  Variability around the age-11 mode and the relative frequency of intermediate aged (ages 7-9) fish appeared to explain much of the difference in age distribution among regions.
 
 ```{r echo=FALSE, results=show.res, message=show.msg}
 bio_LW <- filterD(bio,sex!="juvenile",!is.na(wt),!is.na(tl))
@@ -276,26 +288,28 @@ lm1NMf <- lm(logW~logL,data=filterD(bio_LW,region=="NoMich",sex=="female"))
 lm1NOf <- lm(logW~logL,data=filterD(bio_LW,region=="NoOnt",sex=="female"))
 lm1SOf <- lm(logW~logL,data=filterD(bio_LW,region=="SoOnt",sex=="female"))
 lm1EMf <- lm(logW~logL,data=filterD(bio_LW,region=="EastMich",sex=="female"))
+lm1ALLf <- lm(logW~logL,data=filterD(bio_LW,sex=="female"))
 lm1WAm <- lm(logW~logL,data=filterD(bio_LW,region=="West",sex=="male"))
 lm1NMm <- lm(logW~logL,data=filterD(bio_LW,region=="NoMich",sex=="male"))
 lm1NOm <- lm(logW~logL,data=filterD(bio_LW,region=="NoOnt",sex=="male"))
 lm1SOm <- lm(logW~logL,data=filterD(bio_LW,region=="SoOnt",sex=="male"))
 lm1EMm <- lm(logW~logL,data=filterD(bio_LW,region=="EastMich",sex=="male"))
+lm1ALLm <- lm(logW~logL,data=filterD(bio_LW,sex=="male"))
 
 lw_allregs <- data.frame(
-           sex=gl(2,5,labels=c("female","male")),region=rep(regL,2),
+           sex=gl(2,6,labels=c("female","male")),region=rep(c(regL,"all"),2),
            n=c(lm1WAf$df.residual+2,lm1NMf$df.residual+2,lm1NOf$df.residual+2,
-               lm1SOf$df.residual+2,lm1EMf$df.residual+2,
+               lm1SOf$df.residual+2,lm1EMf$df.residual+2,lm1ALLf$df.residual+2,
                lm1WAm$df.residual+2,lm1NMm$df.residual+2,lm1NOm$df.residual+2,
-               lm1SOm$df.residual+2,lm1EMm$df.residual+2),
+               lm1SOm$df.residual+2,lm1EMm$df.residual+2,lm1ALLm$df.residual+2),
            r2=c(rSquared(lm1WAf),rSquared(lm1NMf),rSquared(lm1NOf),
-                rSquared(lm1SOf),rSquared(lm1EMf),
+                rSquared(lm1SOf),rSquared(lm1EMf),rSquared(lm1ALLf),
                 rSquared(lm1WAm),rSquared(lm1NMm),rSquared(lm1NOm),
-                rSquared(lm1SOm),rSquared(lm1EMm)),
+                rSquared(lm1SOm),rSquared(lm1EMm),rSquared(lm1ALLm)),
            rbind(lm1WAf$coefficients,lm1NMf$coefficients,lm1NOf$coefficients,
-                 lm1SOf$coefficients,lm1EMf$coefficients,
+                 lm1SOf$coefficients,lm1EMf$coefficients,lm1ALLf$coefficients,
                  lm1WAm$coefficients,lm1NMm$coefficients,lm1NOm$coefficients,
-                 lm1SOm$coefficients,lm1EMm$coefficients))
+                 lm1SOm$coefficients,lm1EMm$coefficients,lm1ALLm$coefficients))
 # reverse order of intercept and slope
 lw_allregs <- lw_allregs[,c(1:4,6,5)]
 names(lw_allregs)[5:6] <- c("b","log(a)")
@@ -417,19 +431,21 @@ lwcomp_res <- cbind(lwcomp_res,adj.p=p.adjust(lwcomp_res[,"Pvalue.1"]))
 lwcomp_res <- data.frame(lwcomp_res,sig=lwcomp_res[,"adj.p"]<0.05)
 
 ## Add the intercepts from the model with a common slope
-lw_allregs <- cbind(lw_allregs,coef(lm2a)[-1])
+lw_allregs <- cbind(lw_allregs,c(coef(lm2a)[2:6],NA,coef(lm2a)[7:11],NA))
 names(lw_allregs)[ncol(lw_allregs)] <- "adj.log(a)"
 
 ## Add the predicted weight at the median tl
-lw_allregs <- cbind(lw_allregs,
-                    10^predict(lm2a,data.frame(logL=log10(mdn_tl),
-                                               sexreg=levels(bio_LW$sexreg))))
+predWs <- 10^predict(lm2a,data.frame(logL=log10(mdn_tl),sexreg=levels(bio_LW$sexreg)))
+lw_allregs <- cbind(lw_allregs,c(predWs[1:5],
+                                 10^predict(lm1ALLf,data.frame(logL=log10(mdn_tl))),
+                                 predWs[6:10],
+                                 10^predict(lm1ALLm,data.frame(logL=log10(mdn_tl)))))
 names(lw_allregs)[ncol(lw_allregs)] <- "predW"
 ## Clean up and print results
 rownames(lw_allregs) <- NULL
 ```
 
-The slopes of the weight-length relationships did not differ between sexes (`r kPvalue(lw_aov1["logL:sex","Pr(>F)"],digits=3)`), among regions (`r kPvalue(lw_aov1["logL:region","Pr(>F)"],digits=3)`), or due to the interaction between sex and region (`r kPvalue(lw_aov1["logL:region:sex","Pr(>F)"],digits=3)`).  The intercepts, however, differed between the sexes (`r kPvalue(lw_aov1["sex","Pr(>F)"],digits=3)`) and among the regions (`r kPvalue(lw_aov1["region","Pr(>F)"],digits=3)`), but not due to the interaction of sex and region (`r kPvalue(lw_aov1["region:sex","Pr(>F)"],digits=3)`).  Post hoc contrasts found that the intercept for females was greater than that for males for fish from Eastern Michigan (`r kPvalue(lwcomp_res["male v. female, EastMich","adj.p"],digits=3)`), but there were no differences between sexes for any other region (p > `r kPvalue(min(lwcomp_res[1:4,"adj.p"]),digits=3,include.p=FALSE)`).  Post hoc contrasts showed that the intercepts did not significantly differ among regions for male Kiyi (`r kPvalue(min(lwcomp_res[16:25,"adj.p"]),digits=3,include.p=FALSE)`), but that the intercept for females from Eastern Michigan and Southern Ontario did not signficantly differ (`r kPvalue(lwcomp_res["female, SoOnt v. EastMich","adj.p"],digits=3)`), but were significantly greater than for females from all other regions (p < `r kPvalue(max(lwcomp_res[c(9,11:14),"adj.p"]),digits=3,include.p=FALSE)`) except for when Southern Ontario was compared to the Western Arm (`r kPvalue(lwcomp_res["female, West v. SoOnt","adj.p"],digits=3)`).  The intercepts for females from the Western Arm, Northern Michigan, and Northern Ontario did not significantly differ (`r kPvalue(min(lwcomp_res[c(6,7,10),"adj.p"]),digits=3)`).
+The slopes of the weight-length relationships (Table 2) did not differ between sexes (`r kPvalue(lw_aov1["logL:sex","Pr(>F)"],digits=3)`), among regions (`r kPvalue(lw_aov1["logL:region","Pr(>F)"],digits=3)`), or due to the interaction between sex and region (`r kPvalue(lw_aov1["logL:region:sex","Pr(>F)"],digits=3)`).  The intercepts, however, differed between the sexes (`r kPvalue(lw_aov1["sex","Pr(>F)"],digits=3)`) and among the regions (`r kPvalue(lw_aov1["region","Pr(>F)"],digits=3)`), but not due to the interaction of sex and region (`r kPvalue(lw_aov1["region:sex","Pr(>F)"],digits=3)`).  Post hoc contrasts found that the intercept for females was greater than that for males for fish from Eastern Michigan (`r kPvalue(lwcomp_res["male v. female, EastMich","adj.p"],digits=3)`), but there were no differences between sexes for any other region (p > `r kPvalue(min(lwcomp_res[1:4,"adj.p"]),digits=3,include.p=FALSE)`).  Thus, females were heavier than males at all lengths only for fish from Eastern Michigan.  Post hoc contrasts showed that the intercept for females from Eastern Michigan and Southern Ontario did not significantly differ (`r kPvalue(lwcomp_res["female, SoOnt v. EastMich","adj.p"],digits=3)`), but were significantly greater than for females from all other regions (p < `r kPvalue(max(lwcomp_res[c(9,11:14),"adj.p"]),digits=3,include.p=FALSE)`) except for when Southern Ontario was compared to the Western Arm (`r kPvalue(lwcomp_res["female, West v. SoOnt","adj.p"],digits=3)`).  The intercepts for females from the Western Arm, Northern Michigan, and Northern Ontario did not significantly differ (`r kPvalue(min(lwcomp_res[c(6,7,10),"adj.p"]),digits=3)`).  Thus, females from Easter Michigan and Southern Ontario were generally heavier at the same length than females from the other regions.  The intercepts did not significantly differ among regions for male Kiyi (`r kPvalue(min(lwcomp_res[16:25,"adj.p"]),digits=3,include.p=FALSE)`) which indicates that male Kiyi of the same length have statistical similar weights throughout Lake Superior. 
 
 ```{r echo=FALSE, results=show.res, fig.show='hide', warning=FALSE, message=FALSE}
 lf <- read.csv("data/clean/lenfreq_all.csv") %>%
@@ -544,7 +560,7 @@ lm_growth6 <- lm(tl~region,data=filterD(lf14_ages_growth,otoAge==6))
 grow_aov6 <- Anova(lm_growth6)
 grow_mc6 <- summary(glht(lm_growth6,mcp(region="Tukey")))
 cld(grow_mc6)
-grow6_max.sigp <- max(grow_mc6$test$pvalues[grow_mc6$test$pvalues<0.05])
+#grow6_max.sigp <- max(grow_mc6$test$pvalues[grow_mc6$test$pvalues<0.05])
 grow6_min.nsigp <- min(grow_mc6$test$pvalues[grow_mc6$test$pvalues>0.05])
 
 lm_growth11 <- lm(tl~region,data=filterD(lf14_ages_growth,otoAge==11))
@@ -555,8 +571,7 @@ grow11_max.sigp <- max(grow_mc11$test$pvalues[grow_mc11$test$pvalues<0.05])
 grow11_min.nsigp <- min(grow_mc11$test$pvalues[grow_mc11$test$pvalues>0.05])
 ```
 
-The mean lengths-at-ages 5, 6, and 11 differed signficantly among regions (Figure 7).  Fish from East Michigan were significantly longer (p < `r kPvalue(grow5_max.sigp,digits=3,include.p=FALSE)`) at age-5 than age-5 fish from other regions which did not differ significantly (p > `r kPvalue(grow5_min.nsigp,digits=3,include.p=FALSE)`).  Fish from North Ontario were significantly shorter than fish from South Ontario and East Michigan at age 6 (p < `r kPvalue(grow6_max.sigp,digits=3,include.p=FALSE)`) and 11 (p < `r kPvalue(grow11_max.sigp,digits=3,include.p=FALSE)`) with no other significant differences at these ages (p > `r kPvalue(min(c(grow6_min.nsigp,grow11_min.nsigp)),digits=3,include.p=FALSE)`).  Kiyi from the 2003 and 2009 year-classes exhbited similar growth trajectories during at least the first five years of life (Figure 7).
-
+The mean lengths-at-ages 5 and 11, but not age 6, differed significantly among regions (Figure 7).  Fish from Eastern Michigan were significantly longer (p < `r kPvalue(grow5_max.sigp,digits=3,include.p=FALSE)`) at age-5 than age-5 fish from other regions, which did not differ significantly (p > `r kPvalue(grow5_min.nsigp,digits=3,include.p=FALSE)`).  Age 11 fish from Northern Ontario were significantly shorter than age-11 fish from all other regions except for Northern Michigan (p < `r kPvalue(grow11_max.sigp,digits=3,include.p=FALSE)`), with no other significant differences at this age (p > `r kPvalue(grow11_min.nsigp,digits=3,include.p=FALSE)`).  Kiyi from the 2003 and 2009 year-classes exhbited similar growth trajectories during at least the first five years of life (Figure 7).
 
 ```{r echo=FALSE, message=show.msg, results=show.res}
 cat("Results for Tables")
