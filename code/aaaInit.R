@@ -31,6 +31,9 @@ library(plotrix)   # plotCI
 library(magrittr)  # for %<>%
 library(dplyr)     # manipulating data
 
+library(knitr)
+opts_chunk$set(prompt=TRUE,comment='')
+
 ##############################################################
 ##  2. Set up colors and names for the regions              ##
 ##############################################################
