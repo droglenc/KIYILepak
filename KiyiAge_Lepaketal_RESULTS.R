@@ -80,31 +80,45 @@ xtabs(~otoAge,data=lf14_ages)
 
 ################################################################################
 ## PLOTS
+##
+## This is needed for EPS plots that require the Arial font
+#Sys.setenv(R_GSCMD="c:/apps/gs/gs9.20/bin/gswin32c.exe")
+#library(extrafont)
+#font_import() # may be asked to say "y"
+#loadfonts(device="postscript")
+#postscript("results/figures/Figure2_OtoOtoComp.eps",width=4.5,height=4.5,pointsize=14,family="Arial",horizontal=FALSE,paper="special")
+#dev.off()
+#embedFonts("results/figures/Figure2_OtoOtoComp.eps",outfile="results/figures/Figure2.eps",options="-dEPSCrop")
+# I could not get cropping to work properly
 
 ## Figure 2 ... Otolith age comparison
-jpeg("results/figures/Figure2_OtoOtoComp.JPEG",width=4.5,height=4.5,units="in",
-     pointsize=14,family="sans",quality=100,res=144)
+#jpeg("results/figures/Figure2_OtoOtoComp.eps",width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
+pdf("results/figures/Figure2.pdf",width=6,height=6,family="Arial",pointsize=14)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
-plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="black",yaxt="n",
+plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.9,lwd.CI=2,col.CIsig="black",yaxt="n",
      lwd.agree=1,xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
-     show.pts=TRUE,transparency=1/15,ylab="Second Reader",xlab="First Reader")
+     show.pts=TRUE,transparency=1/5,ylab="Second Reader",xlab="First Reader")
 axis(2,seq(-3,2,1))
+axis(1,c(11,13,15,17,19))
 dev.off()
+embedFonts("results/figures/Figure2.pdf",outfile="results/figures/Figure2.pdf")
 
 ## Figure 3 ... Scale-Otolith age-bias plot
-jpeg("results/figures/Figure3_ScaleOtoComp.JPEG",width=4.5,height=4.5,
-     units="in",pointsize=14,family="sans",quality=100,res=144)
+#jpeg("results/figures/Figure3_ScaleOtoComp.JPEG",width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
+pdf("results/figures/Figure3.pdf",width=6,height=6,family="Arial",pointsize=14)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
-plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.6,lwd.CI=2,col.CIsig="black",
+plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.9,lwd.CI=2,col.CIsig="black",
      lwd.agree=1,xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
      show.pts=TRUE,transparency=1/5)
 axis(2,seq(-10,0,1))
 axis(1,seq(4,16,2))
+axis(1,c(11,13,15))
 dev.off()
+embedFonts("results/figures/Figure3.pdf",outfile="results/figures/Figure3.pdf")
 
 ## Figure 4 ... Age frequency
-jpeg("results/figures/Figure4_OtoAgeFreq.JPEG",width=4.5,height=4.5,
-     units="in",pointsize=14,family="sans",quality=100,res=144)
+#jpeg("results/figures/Figure4_OtoAgeFreq.JPEG",width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
+pdf("results/figures/Figure4.pdf",width=6,height=6,family="Arial",pointsize=14)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
 hist(~otoAge,data=lf14_ages,xlab="Age (years)",w=1,
      xaxt="n",yaxt="n",ylim=c(0,300),col="gray70")
@@ -113,7 +127,7 @@ axis(1,at=seq(5.5,20.5,5),labels=seq(5,20,5))
 axis(2,at=seq(0,300,50),labels=NA)
 axis(2,at=seq(0,300,100),labels=seq(0,300,100))
 dev.off()
-
+embedFonts("results/figures/Figure4.pdf",outfile="results/figures/Figure4.pdf")
 
 ## Figure 5 ... Length Frequency Progression
 lf <- read.csv("data/clean/lenfreq_all.csv") %>%
@@ -124,14 +138,14 @@ lf %<>% mutate(year2=factor(mapvalues(year,levels(year),
                                       paste0(tmp$year," (n=",tmp$n,")"))))
 lvls <- levels(lf$year2)
 
-jpeg("results/figures/Figure5_LFProgression.JPEG",width=6.5,height=9,
-    units="in",pointsize=24,family="sans",quality=100,res=144)
+#jpeg("results/figures/Figure5_LFProgression.JPEG",width=6.5,height=9,units="in",pointsize=24,family="sans",quality=100,res=144)
+pdf("results/figures/Figure5.pdf",width=6,height=9,family="Arial",pointsize=24)
 ggplot(lf,aes(x=tl)) +
   theme_mhist() +
-  scale_x_continuous(expand=c(0.02,0),limits=c(40,305),breaks=seq(0,350,50),
+  scale_x_continuous(expand=c(0.02,0),limits=c(40,310),breaks=seq(0,350,50),
                      labels=c("","",100,"",200,"",300,"")) +
   scale_y_continuous(expand=c(0,0),limits=c(0,1.2)) +
-  geom_histogram(aes(y=..ncount..),binwidth=5,fill="gray70",color="black") +
+  geom_histogram(aes(y=..ncount..),binwidth=5,fill="gray70",color="black",size=0.1) +
   facet_wrap(~year2,nrow=4,dir="v") +
   labs(x="Total Length (mm)",y="Relative Frequency") +
   geom_vline(xintercept=110,lty=2) +
@@ -142,3 +156,5 @@ ggplot(lf,aes(x=tl)) +
   geom_text(aes(y=0.65),data=data.frame(tl=90,year2=factor(lvls[8],levels=lvls)),
             label="5",size=5)
 dev.off()
+embedFonts("results/figures/Figure5.pdf",outfile="results/figures/Figure5.pdf")
+

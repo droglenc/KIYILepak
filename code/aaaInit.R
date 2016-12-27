@@ -31,7 +31,7 @@ opts_chunk$set(prompt=TRUE,comment='')
 ##############################################################
 theme_kiyi <- function (base_size = 12, base_family = "") {
   theme_bw(base_size=base_size,base_family=base_family) +
-    theme(panel.grid.major=element_blank(),
+    theme(panel.grid.major=element_line(colour="gray95"),
           panel.grid.minor=element_blank(),
           panel.border = element_rect(color="black",size=1.25),
           strip.background = element_rect(color="black",size=1.25),
