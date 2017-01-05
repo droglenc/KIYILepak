@@ -95,7 +95,7 @@ xtabs(~otoAge,data=lf14_ages)
 jpeg("results/figures/Figure2_OtoOtoComp.jpg",width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
 #pdf("results/figures/Figure2.pdf",width=6,height=6,family="Arial",pointsize=14)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
-plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.9,lwd.CI=2,col.CIsig="black",yaxt="n",
+plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.7,lwd.CI=2,col.CIsig="black",yaxt="n",
      lwd.agree=1,xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
      show.pts=TRUE,transparency=1/5,ylab="Second Reader",xlab="First Reader")
 axis(2,seq(-3,2,1))
@@ -107,7 +107,7 @@ dev.off()
 jpeg("results/figures/Figure3_ScaleOtoComp.jpg",width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
 #pdf("results/figures/Figure3.pdf",width=6,height=6,family="Arial",pointsize=14)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
-plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.9,lwd.CI=2,col.CIsig="black",
+plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.7,lwd.CI=2,col.CIsig="black",
      lwd.agree=1,xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
      show.pts=TRUE,transparency=1/5)
 axis(2,seq(-10,0,1))
