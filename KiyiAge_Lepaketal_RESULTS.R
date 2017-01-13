@@ -80,20 +80,17 @@ xtabs(~otoAge,data=lf14_ages)
 
 ################################################################################
 ## PLOTS
-##
-## This is needed for EPS plots that require the Arial font
-#Sys.setenv(R_GSCMD="c:/apps/gs/gs9.20/bin/gswin32c.exe")
-#library(extrafont)
-#font_import() # may be asked to say "y"
-#loadfonts(device="postscript")
-#postscript("results/figures/Figure2_OtoOtoComp.eps",width=4.5,height=4.5,pointsize=14,family="Arial",horizontal=FALSE,paper="special")
-#dev.off()
-#embedFonts("results/figures/Figure2_OtoOtoComp.eps",outfile="results/figures/Figure2.eps",options="-dEPSCrop")
-# I could not get cropping to work properly
+
+## Not which type to make ... varied among journal submissions (tiff for NAJFM)
+ptype <- c("PDF","JPG","TIFF")[3]
 
 ## Figure 2 ... Otolith age comparison
-jpeg("results/figures/Figure2_OtoOtoComp.jpg",width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
-#pdf("results/figures/Figure2.pdf",width=6,height=6,family="Arial",pointsize=14)
+fig2 <- "results/figures/Figure2_OtoOtoComp"
+if (ptype=="JPG") {
+  jpeg(paste0(fig2,".jpg"),width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
+} else if (ptype=="PDF") {
+  pdf(paste0(fig2,".pdf"),width=6,height=6,family="Arial",pointsize=14)
+} else tiff(paste0(fig2,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
 plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.7,lwd.CI=2,col.CIsig="black",yaxt="n",
      lwd.agree=1,xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
@@ -101,11 +98,14 @@ plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.7,lwd.CI=2,col.CIsig="black",yaxt="n"
 axis(2,seq(-3,2,1))
 axis(1,c(11,13,15,17,19))
 dev.off()
-#embedFonts("results/figures/Figure2.pdf",outfile="results/figures/Figure2.pdf")
 
 ## Figure 3 ... Scale-Otolith age-bias plot
-jpeg("results/figures/Figure3_ScaleOtoComp.jpg",width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
-#pdf("results/figures/Figure3.pdf",width=6,height=6,family="Arial",pointsize=14)
+fig3 <- "results/figures/Figure3_ScaleOtoComp"
+if (ptype=="JPG") {
+  jpeg(paste0(fig3,".jpg"),width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
+} else if (ptype=="PDF") {
+  pdf(paste0(fig3,".pdf"),width=6,height=6,family="Arial",pointsize=14)
+} else tiff(paste0(fig3,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
 plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.7,lwd.CI=2,col.CIsig="black",
      lwd.agree=1,xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
@@ -114,11 +114,14 @@ axis(2,seq(-10,0,1))
 axis(1,seq(4,16,2))
 axis(1,c(11,13,15))
 dev.off()
-#embedFonts("results/figures/Figure3.pdf",outfile="results/figures/Figure3.pdf")
 
 ## Figure 4 ... Age frequency
-jpeg("results/figures/Figure4_OtoAgeFreq.jpg",width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
-#pdf("results/figures/Figure4.pdf",width=6,height=6,family="Arial",pointsize=14)
+fig4 <- "results/figures/Figure4_OtoAgeFreq"
+if (ptype=="JPG") {
+  jpeg(paste0(fig4,".jpg"),width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
+} else if (ptype=="PDF") {
+  pdf(paste0(fig4,".pdf"),width=6,height=6,family="Arial",pointsize=14)
+} else tiff(paste0(fig4,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
 hist(~otoAge,data=lf14_ages,xlab="Age (years)",w=1,
      xaxt="n",yaxt="n",ylim=c(0,300),col="gray70")
@@ -127,7 +130,6 @@ axis(1,at=seq(5.5,20.5,5),labels=seq(5,20,5))
 axis(2,at=seq(0,300,50),labels=NA)
 axis(2,at=seq(0,300,100),labels=seq(0,300,100))
 dev.off()
-#embedFonts("results/figures/Figure4.pdf",outfile="results/figures/Figure4.pdf")
 
 ## Figure 5 ... Length Frequency Progression
 lf <- read.csv("data/clean/lenfreq_all.csv") %>%
@@ -138,8 +140,12 @@ lf %<>% mutate(year2=factor(mapvalues(year,levels(year),
                                       paste0(tmp$year," (n=",tmp$n,")"))))
 lvls <- levels(lf$year2)
 
-jpeg("results/figures/Figure5_LFProgression.jpg",width=6.5,height=9,units="in",pointsize=24,family="sans",quality=100,res=144)
-#pdf("results/figures/Figure5.pdf",width=6,height=9,family="Arial",pointsize=24)
+fig5 <- "results/figures/Figure5_LFProgression"
+if (ptype=="JPG") {
+  jpeg(paste0(fig5,".jpg"),width=6.5,height=9,units="in",pointsize=24,family="sans",quality=100,res=144)
+} else if (ptype=="PDF") {
+  pdf(paste0(fig5,".pdf"),width=6,height=9,family="Arial",pointsize=24)
+} else tiff(paste0(fig5,".tif"),width=7.25,height=10,units="in",pointsize=10,family="sans",res=300)
 ggplot(lf,aes(x=tl)) +
   theme_mhist() +
   scale_x_continuous(expand=c(0.02,0),limits=c(40,310),breaks=seq(0,350,50),
@@ -156,5 +162,4 @@ ggplot(lf,aes(x=tl)) +
   geom_text(aes(y=0.65),data=data.frame(tl=90,year2=factor(lvls[8],levels=lvls)),
             label="5",size=5)
 dev.off()
-#embedFonts("results/figures/Figure5.pdf",outfile="results/figures/Figure5.pdf")
 
