@@ -81,47 +81,51 @@ xtabs(~otoAge,data=lf14_ages)
 ################################################################################
 ## PLOTS
 
-## Not which type to make ... varied among journal submissions (tiff for NAJFM)
-ptype <- c("PDF","JPG","TIFF")[3]
+## Which type to make ... varied among journal submissions (tiff for NAJFM)
+ptype <- c("PDF","JPG","TIFF")[2]
 
-## Figure 2 ... Otolith age comparison
-fig2 <- "results/figures/Figure2_OtoOtoComp"
-if (ptype=="JPG") {
-  jpeg(paste0(fig2,".jpg"),width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
-} else if (ptype=="PDF") {
-  pdf(paste0(fig2,".pdf"),width=6,height=6,family="Arial",pointsize=14)
-} else tiff(paste0(fig2,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
-par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
-plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.7,lwd.CI=2,col.CIsig="black",yaxt="n",
-     lwd.agree=1,xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
-     show.pts=TRUE,transparency=1/5,ylab="Second Reader",xlab="First Reader")
-axis(2,seq(-3,2,1))
-axis(1,c(11,13,15,17,19))
-dev.off()
-
-## Figure 3 ... Scale-Otolith age-bias plot
-fig3 <- "results/figures/Figure3_ScaleOtoComp"
+## Figure 3 ... Otolith age comparison
+fig3 <- "results/figures/Figure3_OtoOtoComp"
 if (ptype=="JPG") {
   jpeg(paste0(fig3,".jpg"),width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
 } else if (ptype=="PDF") {
   pdf(paste0(fig3,".pdf"),width=6,height=6,family="Arial",pointsize=14)
 } else tiff(paste0(fig3,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
-plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.7,lwd.CI=2,col.CIsig="black",
-     lwd.agree=1,xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
+plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.7,
+     lwd.CI=1.5,col.CIsig="black",yaxt="n",
+     lwd.agree=1,lty.agree=1,col.agree="gray80",
+     xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
+     show.pts=TRUE,transparency=1/5,ylab="Second Reader Age",xlab="First Reader Age")
+axis(2,seq(-3,2,1))
+axis(1,c(11,13,15,17,19))
+dev.off()
+
+## Figure 4 ... Scale-Otolith age-bias plot
+fig4 <- "results/figures/Figure4_ScaleOtoComp"
+if (ptype=="JPG") {
+  jpeg(paste0(fig4,".jpg"),width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
+} else if (ptype=="PDF") {
+  pdf(paste0(fig4,".pdf"),width=6,height=6,family="Arial",pointsize=14)
+} else tiff(paste0(fig4,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
+par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
+plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.7,
+     lwd.CI=1.5,col.CIsig="black",
+     lwd.agree=1,lty.agree=1,col.agree="gray80",
+     xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
      show.pts=TRUE,transparency=1/5)
 axis(2,seq(-10,0,1))
 axis(1,seq(4,16,2))
 axis(1,c(11,13,15))
 dev.off()
 
-## Figure 4 ... Age frequency
-fig4 <- "results/figures/Figure4_OtoAgeFreq"
+## Figure 5 ... Age frequency
+fig5 <- "results/figures/Figure5_OtoAgeFreq"
 if (ptype=="JPG") {
-  jpeg(paste0(fig4,".jpg"),width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
+  jpeg(paste0(fig5,".jpg"),width=4.5,height=4.5,units="in",pointsize=14,family="sans",quality=100,res=144)
 } else if (ptype=="PDF") {
-  pdf(paste0(fig4,".pdf"),width=6,height=6,family="Arial",pointsize=14)
-} else tiff(paste0(fig4,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
+  pdf(paste0(fig5,".pdf"),width=6,height=6,family="Arial",pointsize=14)
+} else tiff(paste0(fig5,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
 hist(~otoAge,data=lf14_ages,xlab="Age (years)",w=1,
      xaxt="n",yaxt="n",ylim=c(0,300),col="gray70")
@@ -131,7 +135,7 @@ axis(2,at=seq(0,300,50),labels=NA)
 axis(2,at=seq(0,300,100),labels=seq(0,300,100))
 dev.off()
 
-## Figure 5 ... Length Frequency Progression
+## Figure 6 ... Length Frequency Progression
 lf <- read.csv("data/clean/lenfreq_all.csv") %>%
   mutate(year=factor(year)) %>%
   filterD(year %in% 2003:2014)
@@ -140,12 +144,12 @@ lf %<>% mutate(year2=factor(mapvalues(year,levels(year),
                                       paste0(tmp$year," (n=",tmp$n,")"))))
 lvls <- levels(lf$year2)
 
-fig5 <- "results/figures/Figure5_LFProgression"
+fig6 <- "results/figures/Figure6_LFProgression"
 if (ptype=="JPG") {
-  jpeg(paste0(fig5,".jpg"),width=6.5,height=9,units="in",pointsize=24,family="sans",quality=100,res=144)
+  jpeg(paste0(fig6,".jpg"),width=6.5,height=9,units="in",pointsize=24,family="sans",quality=100,res=144)
 } else if (ptype=="PDF") {
-  pdf(paste0(fig5,".pdf"),width=6,height=9,family="Arial",pointsize=24)
-} else tiff(paste0(fig5,".tif"),width=7.25,height=10,units="in",pointsize=10,family="sans",res=300)
+  pdf(paste0(fig6,".pdf"),width=6,height=9,family="Arial",pointsize=24)
+} else tiff(paste0(fig6,".tif"),width=7.25,height=10,units="in",pointsize=10,family="sans",res=300)
 ggplot(lf,aes(x=tl)) +
   theme_mhist() +
   scale_x_continuous(expand=c(0.02,0),limits=c(40,310),breaks=seq(0,350,50),
