@@ -82,7 +82,7 @@ xtabs(~otoAge,data=lf14_ages)
 ## PLOTS
 
 ## Which type to make ... varied among journal submissions (tiff for NAJFM)
-ptype <- c("PDF","JPG","TIFF")[2]
+ptype <- c("PDF","JPG","TIFF")[3]
 
 ## Figure 3 ... Otolith age comparison
 fig3 <- "results/figures/Figure3_OtoOtoComp"
@@ -92,7 +92,7 @@ if (ptype=="JPG") {
   pdf(paste0(fig3,".pdf"),width=6,height=6,family="Arial",pointsize=14)
 } else tiff(paste0(fig3,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
-plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.7,
+plot(ab_OO,show.n=TRUE,nYpos=0.025,cex.n=0.7,pch.mean=23,
      lwd.CI=1.5,col.CIsig="black",yaxt="n",
      lwd.agree=1,lty.agree=1,col.agree="gray80",
      xlim=c(3,20),ylim=c(-3.4,2),difference=TRUE,
@@ -109,7 +109,7 @@ if (ptype=="JPG") {
   pdf(paste0(fig4,".pdf"),width=6,height=6,family="Arial",pointsize=14)
 } else tiff(paste0(fig4,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
 par(mar=c(3,3,0.5,0.5),mgp=c(1.9,0.5,0),tcl=-0.2,las=1)
-plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.7,
+plot(ab_OS,show.n=TRUE,nYpos=0.025,cex.n=0.7,pch.mean=23,
      lwd.CI=1.5,col.CIsig="black",
      lwd.agree=1,lty.agree=1,col.agree="gray80",
      xlim=c(3,16),ylim=c(-10.5,0),difference=TRUE,yaxt="n",
